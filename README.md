@@ -11,20 +11,23 @@ flowchart TD
 
 Reusable workflow definitions for coordinating AI-assisted work.
 
-## Status: TODO
+## Published contracts
 
 ```mermaid
 flowchart TD
   Actor["Actor: public AI Workflows repository"]
-  Actor --> Today["Today: README and design placeholder only"]
-  Today --> Review["Prepare portable workflows in the private source"]
+  Actor --> Common["Published: common workflow-agent contract"]
+  Common --> Review["Review portable workflow candidates"]
   Review --> Later["Publish approved workflows one at a time"]
-  Later --> Outcome["Outcome: future reusable workflow catalog"]
+  Later --> Outcome["Outcome: curated reusable workflow catalog"]
 ```
 
-This repository is intentionally a placeholder. No workflow definitions,
-profiles, agents, runtime implementation, project bindings, configuration, or
-credentials are published here yet.
+The repository currently publishes
+[`common-workflow-agents.md`](common-workflow-agents.md), the shared topology and
+lifecycle contract for workflows that activate managed agents. Concrete
+workflow definitions will be added separately after portability and privacy
+review. Profiles, client bindings, credentials, and private runtime
+configuration are not published here.
 
 ## Relationship to AI Commands
 
@@ -78,6 +81,27 @@ runtime code, and visual applications will remain optional and workflow-owned.
 The final public template will be added when the first workflow is prepared for
 review.
 
+## Common workflow agents
+
+```mermaid
+flowchart TD
+  Actor["Actor: agent-enabled workflow"]
+  Actor --> Commands["Inherit sibling AI Commands agent behavior"]
+  Commands --> Common["Inherit common Admin, Judge, and lifecycle rules"]
+  Common --> Specific["Add workflow-specific roles and routes"]
+  Specific --> Outcome["Outcome: layered workflow-owned agent system"]
+```
+
+Agent-enabled workflows inherit
+[`common-workflow-agents.md`](common-workflow-agents.md). It defines the common
+Admin and Judge roles, workflow-owned initialization, and the boundary between
+portable command behavior and workflow-specific topology.
+
+Local installations may keep `ai-commands/` and `ai-workflows/` as sibling
+folders. The common contract therefore links directly to
+[`agents.command.md`](../ai-commands/agents/agents.command.md) in the sibling
+AI Commands checkout.
+
 ## Publication boundary
 
 ```mermaid
@@ -89,6 +113,6 @@ flowchart TD
   Review --> Outcome["Outcome: curated public workflow"]
 ```
 
-Future workflows will be published only after portability, documentation,
-privacy, and security review. Until then, this README is the complete public
-repository content.
+Additional workflows will be published only after portability, documentation,
+privacy, and security review. The common workflow-agent contract is reusable
+infrastructure and does not publish any private profile or concrete workflow.
