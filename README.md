@@ -96,6 +96,68 @@ infrastructure rather than an AI command or standalone agent. Each concrete
 workflow adds its own roles, models, capabilities, routes, and stricter rules
 without duplicating the common contract.
 
+### Workflow-owned file responsibilities
+
+| File | One purpose | Must not become |
+| --- | --- | --- |
+| `agents/team.md` | Readable roster: included roles, their contract files, and whole-roster initialization | A permission or packet-routing authority |
+| `agents/role-capability-matrix.csv` | Runtime role identity and lifecycle authority | A work-ownership or transport definition |
+| `agents/role-capability-ownership.csv` | Work ownership, execution, delegation, and prohibition authority | A roster or packet-format definition |
+| `agents/role-communication-matrix.csv` | Human and role-to-role communication authority | A work-capability definition |
+| `agents/shared-execution-routing.md` | Shared packet, verification, delivery, evidence, and closure mechanics | A source of roles or permissions |
+| `agents/<role>.md` | One role's bounded behavior and mechanics | A duplicate team-wide permission matrix |
+
+The matrices decide what is allowed. The roster makes membership readable. Shared routing explains how an authorized
+interaction travels. Role files explain how one role behaves inside those boundaries. Prose may narrow a matrix-authorized
+action with safety checks, but it cannot create a missing role, capability, route, or exception.
+
+### Role and capability matrices
+
+The common package includes three empty CSV schemas:
+
+- [`role-capability-matrix.csv`](role-capability-matrix.csv) defines the roles a workflow initializes and their runtime
+  identity, model, lifecycle, human-facing mode, and communication mode.
+- [`role-capability-ownership.csv`](role-capability-ownership.csv) defines what each role owns, may dispatch, may read,
+  or must never perform.
+- [`role-communication-matrix.csv`](role-communication-matrix.csv) defines human dialogue, internal packet, authorization
+  relay, and role-to-role communication routes.
+
+Empty common schemas grant nothing. An agent-enabled workflow copies and fills all three files in its own `agents/` folder.
+Every role contract then places a readable `Capability declaration` near its top and links to those workflow-local
+matrices. The readable table summarizes the boundary; the filled CSVs are the mechanical authority.
+
+A simplified role matrix can look like this:
+
+```csv
+role,display_label,model,reasoning,lifecycle,human_facing,communication_mode
+designer / reviewer,Designer / Reviewer,configured-model,low,persistent control,primary,human dialogue and agent packets
+coder,Coder,configured-model,medium,disposable worker,not human-facing,internal packets only
+command-runner,Command Runner,configured-model,low,disposable worker,not human-facing,internal packets only
+```
+
+The matching ownership matrix can look like this:
+
+```csv
+capability,designer_reviewer,coder,command_runner
+Product requirements and architecture,OWN,READ_DETAIL,PROHIBITED
+Product source and tests,PROHIBITED,OWN,PROHIBITED
+Registered command execution,DISPATCH_ONLY,DISPATCH_ONLY,OWN
+```
+
+The matching communication matrix can look like this:
+
+```csv
+route,designer_reviewer,coder,command_runner
+direct_human_dialogue,PRIMARY,PROHIBITED,PROHIBITED
+send_internal_work_packet,AUTHORIZED,PROHIBITED,RETURN_ONLY
+use_human_as_packet_courier,PROHIBITED,PROHIBITED,PROHIBITED
+```
+
+`OWN` remains bounded by the role contract, `DISPATCH_ONLY` permits routing to the exact owner, `READ_DETAIL` is
+passive, and `PROHIBITED` is a hard boundary. A missing role, empty workflow-local matrix, broken declaration link, or
+declaration/matrix disagreement fails closed. Later prose may explain mechanics or narrow a permission, but it cannot
+create a route or capability absent from these matrices.
+
 ## Publication boundary
 
 ```mermaid

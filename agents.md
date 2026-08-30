@@ -24,8 +24,29 @@ flowchart TD
 ```
 
 This file is workflow infrastructure, not an AI command and not a standalone agent implementation. It owns the common
-rules required by all agent-enabled workflows. It does not select a workflow, route user phrases, or define any concrete
-workflow's additional team membership, models, work capabilities, project sources, or product behavior.
+rules required by all agent-enabled workflows. It does not select a workflow or define concrete prompt interpretations,
+team membership, models, work capabilities, project sources, or product behavior for a specific workflow.
+
+## Common human prompt interpretation cases
+
+```mermaid
+flowchart TD
+  Actor["Actor: workflow declares a human-facing agent"] --> Decision{"Decision: its contract maps common human prompts to exact behavior?"}
+  Decision -->|Allowed| Cases["Allowed: document representative wording, interpretation, route, and blocked meaning"]
+  Decision -->|Prohibited| Blocked["BLOCKED: no undocumented shorthand or inferred authority"]
+  Cases --> Outcome["Outcome: human and agent share the same prompt semantics"]
+  Blocked --> Outcome
+```
+
+Every human-facing role must contain `## Human prompt interpretation cases`, mapping common shorthand to its complete
+behavior. Human-facing means its initialized contract explicitly permits direct human dialogue; visibility alone does not.
+
+| Human prompt | Documented interpretation |
+| --- | --- |
+| "Do these one by one." | For each item: prepare and validate → explain → authorize → act. Then repeat for the next item. |
+
+Mappings clarify existing rules; they never create authority. Internal packet-only roles document packet cases instead.
+Unlisted or ambiguous wording returns to ordinary clarification and capability gates.
 
 ## Common workflow scope model
 
@@ -97,6 +118,35 @@ An agent has only capabilities explicitly granted by its current workflow contra
 model ability, filesystem access, command existence, or another agent's authority never grants permission. Missing,
 ambiguous, stale, or conflicting capability data fails closed. Workflow contracts may narrow this base but may not silently
 weaken it.
+
+## Common role capability declaration
+
+```mermaid
+flowchart TD
+  Actor["Actor: workflow role contract is read or changed"] --> Decision{"Decision: top capability declaration is complete and consistent?"}
+  Decision -->|Allowed| Detail["Allowed: use later chapters only to explain the declared boundary"]
+  Decision -->|Prohibited| Blocked["BLOCKED: no scattered prose may create or hide authority"]
+  Detail --> Outcome["Outcome: permissions and prohibitions are visible before operational detail"]
+  Blocked --> Outcome
+```
+
+Every concrete role contract must place `## Capability declaration` immediately after its identity or role-header
+chapter and before prompt cases, ownership detail, command eligibility, or operational procedures. The declaration uses
+one table with exactly these rows: `May own`, `May execute`, `Must delegate`, and `Must not`. It is the concise index of
+that role's effective boundary; referenced capability data remains the mechanical source of truth. Every declaration
+must link directly to its workflow's filled role, capability-ownership, and communication matrices.
+
+The reusable empty schemas are [role-capability-matrix.csv](role-capability-matrix.csv) and
+[role-capability-ownership.csv](role-capability-ownership.csv), documented by
+[role-capability-matrix.md](role-capability-matrix.md), together with
+[role-communication-matrix.csv](role-communication-matrix.csv). A workflow copies all three schemas into its own agent
+directory, adds its exact role columns and permission rows, and links every role declaration to those local files. Empty
+common schemas grant nothing and cannot be used as runtime capability evidence.
+
+Later prose may explain a declared item but must not introduce a permission, prohibition, or delegation absent from the
+top declaration. A conflict or omission is `BLOCKED_CAPABILITY_DECLARATION_MISMATCH`. Before changing a role contract,
+the author must read this common contract completely, read the complete target role contract, and resolve its referenced
+capability matrix, ownership data, and shared routing rules. Update the declaration and its detailed rule together.
 
 ## Common peer communication
 
