@@ -96,6 +96,21 @@ infrastructure rather than an AI command or standalone agent. Each concrete
 workflow adds its own roles, models, capabilities, routes, and stricter rules
 without duplicating the common contract.
 
+### Workflow-owned file responsibilities
+
+| File | One purpose | Must not become |
+| --- | --- | --- |
+| `agents/team.md` | Readable roster: included roles, their contract files, and whole-roster initialization | A permission or packet-routing authority |
+| `agents/role-capability-matrix.csv` | Runtime role identity and lifecycle authority | A work-ownership or transport definition |
+| `agents/role-capability-ownership.csv` | Work ownership, execution, delegation, and prohibition authority | A roster or packet-format definition |
+| `agents/role-communication-matrix.csv` | Human and role-to-role communication authority | A work-capability definition |
+| `agents/shared-execution-routing.md` | Shared packet, verification, delivery, evidence, and closure mechanics | A source of roles or permissions |
+| `agents/<role>.md` | One role's bounded behavior and mechanics | A duplicate team-wide permission matrix |
+
+The matrices decide what is allowed. The roster makes membership readable. Shared routing explains how an authorized
+interaction travels. Role files explain how one role behaves inside those boundaries. Prose may narrow a matrix-authorized
+action with safety checks, but it cannot create a missing role, capability, route, or exception.
+
 ### Role and capability matrices
 
 The common package includes three empty CSV schemas:
