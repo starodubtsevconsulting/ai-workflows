@@ -96,6 +96,41 @@ infrastructure rather than an AI command or standalone agent. Each concrete
 workflow adds its own roles, models, capabilities, routes, and stricter rules
 without duplicating the common contract.
 
+### Role and capability matrices
+
+The common package includes two empty CSV schemas:
+
+- [`role-capability-matrix.csv`](role-capability-matrix.csv) defines the roles a workflow initializes and their runtime
+  identity, model, lifecycle, human-facing mode, and communication mode.
+- [`role-capability-ownership.csv`](role-capability-ownership.csv) defines what each role owns, may dispatch, may read,
+  or must never perform.
+
+Empty common schemas grant nothing. An agent-enabled workflow copies and fills both files in its own `agents/` folder.
+Every role contract then places a readable `Capability declaration` near its top and links to those workflow-local
+matrices. The readable table summarizes the boundary; the filled CSVs are the mechanical authority.
+
+A simplified role matrix can look like this:
+
+```csv
+role,display_label,model,reasoning,lifecycle,human_facing,communication_mode
+designer / reviewer,Designer / Reviewer,configured-model,low,persistent control,primary,human dialogue and agent packets
+coder,Coder,configured-model,medium,disposable worker,not human-facing,internal packets only
+command-runner,Command Runner,configured-model,low,disposable worker,not human-facing,internal packets only
+```
+
+The matching ownership matrix can look like this:
+
+```csv
+capability,designer_reviewer,coder,command_runner
+Product requirements and architecture,OWN,READ_DETAIL,PROHIBITED
+Product source and tests,PROHIBITED,OWN,PROHIBITED
+Registered command execution,DISPATCH_ONLY,DISPATCH_ONLY,OWN
+```
+
+`OWN` remains bounded by the role contract, `DISPATCH_ONLY` permits routing to the exact owner, `READ_DETAIL` is
+passive, and `PROHIBITED` is a hard boundary. A missing role, empty workflow-local matrix, broken declaration link, or
+declaration/matrix disagreement fails closed.
+
 ## Publication boundary
 
 ```mermaid
