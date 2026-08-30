@@ -24,8 +24,38 @@ flowchart TD
 ```
 
 This file is workflow infrastructure, not an AI command and not a standalone agent implementation. It owns the common
-rules required by all agent-enabled workflows. It does not select a workflow, route user phrases, or define any concrete
-workflow's additional team membership, models, work capabilities, project sources, or product behavior.
+rules required by all agent-enabled workflows. It does not select a workflow or define concrete prompt interpretations,
+team membership, models, work capabilities, project sources, or product behavior for a specific workflow.
+
+## Common human prompt interpretation cases
+
+```mermaid
+flowchart TD
+  Actor["Actor: workflow declares a human-facing agent"] --> Decision{"Decision: its contract maps common human prompts to exact behavior?"}
+  Decision -->|Allowed| Cases["Allowed: document representative wording, interpretation, route, and blocked meaning"]
+  Decision -->|Prohibited| Blocked["BLOCKED: no undocumented shorthand or inferred authority"]
+  Cases --> Outcome["Outcome: human and agent share the same prompt semantics"]
+  Blocked --> Outcome
+```
+
+Every role declared human-facing must contain a `## Human prompt interpretation cases` chapter. The chapter documents
+representative natural-language prompts that are likely to be shortened, ambiguous, or interpreted as broader authority.
+For each case, it states the required interpretation, complete multi-step sequence when applicable, authorized owner or
+route, prohibited shortcuts, and terminal result. It is both agent guidance and human-readable documentation.
+
+A human-facing agent is a role whose initialized contract explicitly permits direct human dialogue and names its mode,
+such as primary coordination, oversight-only governance, or administrative-only control. Task visibility, a display
+title, tool access, or the ability to receive an app message does not make an internal packet-only role human-facing.
+
+Prompt mappings clarify existing rules; they never grant a capability, authorization, destination, identity, or external
+effect that the governing contracts do not already allow. A listed phrase selects its complete documented sequence, not
+only its final verb. For example, "one by one" means complete every required gate for one item, perform its one authorized
+effect, and then restart the same full cycle for the next item. No review, comprehension, authorization, or receipt carries
+forward unless the case and governing contract explicitly permit reuse for the same unchanged identity.
+
+Internal packet-only roles do not expose a human prompt catalog because direct human-style work requests to them are
+prohibited. Their contracts instead document accepted packet cases and rejection behavior. Unlisted or materially
+ambiguous human wording returns to the role's ordinary clarification and capability gates and never creates authority.
 
 ## Common workflow scope model
 
