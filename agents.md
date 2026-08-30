@@ -359,8 +359,12 @@ flowchart TD
 ```
 
 The workflow-owned initialization entrypoint verifies or bootstraps Admin and performs all task mutation. Initialization
-creates the complete declared governed roster. Reinitialization preserves Admin, reconciles roster-owned schedules,
-archives the complete old roster, verifies an inactive barrier, creates one fresh complete roster, binds app-returned
+creates the complete declared governed roster. When a human requests full reinitialization including Admin, the active
+Admin creates one successor Admin in the same runtime project, verifies its exact returned task ID, contract, source,
+model, reasoning, and `ADMIN_READY` acknowledgement, and archives the predecessor only after the successor is ready.
+The temporary overlap is identified exclusively by task ID and grants neither Admin authority to contact the other for
+ordinary work. A failed successor leaves the predecessor active. Reinitialization then reconciles roster-owned schedules,
+archives the complete old governed roster, verifies an inactive barrier, creates one fresh complete roster, binds app-returned
 task IDs, and verifies every readiness token. Archive/remove/delete are recoverable archive operations unless the
 workflow explicitly defines a safer alternative. Partial generations, implicit profile selection, title-only identity,
 hidden substitutes, and cross-project reuse are `BLOCKED`.
