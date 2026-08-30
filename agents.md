@@ -38,24 +38,15 @@ flowchart TD
   Blocked --> Outcome
 ```
 
-Every role declared human-facing must contain a `## Human prompt interpretation cases` chapter. The chapter documents
-representative natural-language prompts that are likely to be shortened, ambiguous, or interpreted as broader authority.
-For each case, it states the required interpretation, complete multi-step sequence when applicable, authorized owner or
-route, prohibited shortcuts, and terminal result. It is both agent guidance and human-readable documentation.
+Every human-facing role must contain `## Human prompt interpretation cases`, mapping common shorthand to its complete
+behavior. Human-facing means its initialized contract explicitly permits direct human dialogue; visibility alone does not.
 
-A human-facing agent is a role whose initialized contract explicitly permits direct human dialogue and names its mode,
-such as primary coordination, oversight-only governance, or administrative-only control. Task visibility, a display
-title, tool access, or the ability to receive an app message does not make an internal packet-only role human-facing.
+| Human prompt | Documented interpretation |
+| --- | --- |
+| "Do these one by one." | For each item: review → explain → authorize → act. Then repeat for the next item. |
 
-Prompt mappings clarify existing rules; they never grant a capability, authorization, destination, identity, or external
-effect that the governing contracts do not already allow. A listed phrase selects its complete documented sequence, not
-only its final verb. For example, "one by one" means complete every required gate for one item, perform its one authorized
-effect, and then restart the same full cycle for the next item. No review, comprehension, authorization, or receipt carries
-forward unless the case and governing contract explicitly permit reuse for the same unchanged identity.
-
-Internal packet-only roles do not expose a human prompt catalog because direct human-style work requests to them are
-prohibited. Their contracts instead document accepted packet cases and rejection behavior. Unlisted or materially
-ambiguous human wording returns to the role's ordinary clarification and capability gates and never creates authority.
+Mappings clarify existing rules; they never create authority. Internal packet-only roles document packet cases instead.
+Unlisted or ambiguous wording returns to ordinary clarification and capability gates.
 
 ## Common workflow scope model
 
