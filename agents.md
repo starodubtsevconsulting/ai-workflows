@@ -134,12 +134,13 @@ Every concrete role contract must place `## Capability declaration` immediately 
 chapter and before prompt cases, ownership detail, command eligibility, or operational procedures. The declaration uses
 one table with exactly these rows: `May own`, `May execute`, `Must delegate`, and `Must not`. It is the concise index of
 that role's effective boundary; referenced capability data remains the mechanical source of truth. Every declaration
-must link directly to its workflow's filled role matrix and capability-ownership matrix.
+must link directly to its workflow's filled role, capability-ownership, and communication matrices.
 
 The reusable empty schemas are [role-capability-matrix.csv](role-capability-matrix.csv) and
 [role-capability-ownership.csv](role-capability-ownership.csv), documented by
-[role-capability-matrix.md](role-capability-matrix.md). A workflow copies both schemas into its own agent directory,
-adds its exact role columns and capability rows, and links every role declaration to those workflow-local files. Empty
+[role-capability-matrix.md](role-capability-matrix.md), together with
+[role-communication-matrix.csv](role-communication-matrix.csv). A workflow copies all three schemas into its own agent
+directory, adds its exact role columns and permission rows, and links every role declaration to those local files. Empty
 common schemas grant nothing and cannot be used as runtime capability evidence.
 
 Later prose may explain a declared item but must not introduce a permission, prohibition, or delegation absent from the
