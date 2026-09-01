@@ -34,6 +34,12 @@ Conceptually:
 
 `opportunity/events + sales strategy -> adaptive flow -> execution roles -> market evidence -> strategy/memory update`
 
+## Prompt routing / use cases
+
+| Example prompt / intent | Route type | Route target | Result / notes |
+| --- | --- | --- | --- |
+|  |  |  |  |
+
 ## Connected commands
 
 Commands are defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
