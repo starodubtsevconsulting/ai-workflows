@@ -1,21 +1,23 @@
 from_agent,to_agent,allowed,purpose
-Human,Admin,true,Initialize reconcile replace archive or recover workflow agent topology
-Admin,Human,true,Report lifecycle result blocked state failure or required Human decision
+Human,Admin,true,Human is the only normal caller of Admin
+Admin,Human,true,Report lifecycle/recovery results and request Human decisions
 Human,Designer Reviewer,true,Primary direct design and development conversation surface
 Human,Strategist,true,Direct workflow-level strategy conversation when appropriate
 Human,Coder,true,Direct bounded implementation interaction when profile exposes Coder
 Human,Manager,false,Manager is not human-facing by default
 Human,Command Runner,false,Commands are reached through authorized roles rather than persona conversation
-Admin,Strategist,false,No ordinary Admin-to-agent communication; lifecycle operations use runtime lifecycle mechanism
-Admin,Designer Reviewer,false,No ordinary Admin-to-agent communication; lifecycle operations use runtime lifecycle mechanism
-Admin,Coder,false,No ordinary Admin-to-agent communication; lifecycle operations use runtime lifecycle mechanism
-Admin,Manager,false,No ordinary Admin-to-agent communication; lifecycle operations use runtime lifecycle mechanism
-Admin,Command Runner,false,Admin lifecycle command access must be explicitly granted separately if required
-Strategist,Admin,false,Admin is Human recovery/lifecycle surface rather than normal workflow collaborator
-Designer Reviewer,Admin,false,Escalate lifecycle/recovery need to Human rather than invoking Admin directly
-Coder,Admin,false,Escalate lifecycle/recovery need through normal caller/Human path
-Manager,Admin,false,Manager does not invoke Admin
-Command Runner,Admin,false,Command Runner does not converse with Admin as an agent target
+Admin,Strategist,true,Admin may directly inspect direct initialize unblock replace stop or otherwise administer workflow agent
+Admin,Designer Reviewer,true,Admin may directly inspect direct initialize unblock replace stop or otherwise administer workflow agent
+Admin,Coder,true,Admin may directly inspect direct initialize unblock replace stop or otherwise administer workflow agent
+Admin,Manager,true,Admin may directly inspect direct initialize unblock replace stop or otherwise administer workflow agent
+Admin,Command Runner,true,Admin may directly use/administer workflow execution capabilities within its workflow scope
+Strategist,Admin,false,No workflow agent may initiate communication with Admin
+Designer Reviewer,Admin,false,No workflow agent may initiate communication with Admin
+Coder,Admin,false,No workflow agent may initiate communication with Admin
+Manager,Admin,false,No workflow agent may initiate communication with Admin
+Command Runner,Admin,false,No workflow agent/execution role may initiate communication with Admin
+Judge,Admin,false,Judge does not initiate communication with Admin; both are Human-facing control surfaces with separate responsibilities
+Admin,Judge,false,Admin does not invoke Judge; governance changes remain Human -> Judge
 Designer Reviewer,Human,true,Discuss design trade-offs decisions and implementation-conformance findings
 Strategist,Human,true,Discuss workflow strategy priorities and durable decisions
 Coder,Human,true,Discuss bounded implementation when exposed as human-facing
