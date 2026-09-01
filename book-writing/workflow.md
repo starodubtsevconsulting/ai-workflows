@@ -2,50 +2,45 @@
 
 ## Purpose
 
-Turn an idea, body of research, lived experience, or partial manuscript into a coherent book while preserving author intent, voice, factual integrity, continuity, and a deliberate path from concept to finished manuscript.
+Turn an idea, research, lived experience, or partial manuscript into a coherent book while preserving author intent, voice, factual integrity and continuity.
 
 ## Strategic layer
 
-This workflow composes a Workflow Strategist from [`_common/roles/workflow/strategist.md`](../_common/roles/workflow/strategist.md). The Strategist uses `WORKFLOW_STRATEGIC` memory to retain the book's durable domain state across sessions: premise, audience, themes, structure, voice decisions, research conclusions, character/concept continuity, editorial decisions, rejected directions and the rationale behind them.
+This workflow composes a Workflow Strategist from [`_common/roles/workflow/strategist.md`](../_common/roles/workflow/strategist.md). The Strategist uses `WORKFLOW_STRATEGIC` memory to retain premise, audience, themes, structure, voice decisions, research conclusions, continuity, editorial decisions, rejected directions and rationale.
 
-The Strategist knows the book and its writing strategy. It does not model or reshape the human author. WHY this book matters relative to other life/work goals, WHEN the author should work on it, and how it competes with other workflows belong to the Global Governor above this workflow.
+The Strategist knows the book and its writing strategy. It does not model or reshape the human author. WHY this book matters relative to other goals, WHEN the author should work on it, and how it competes with other workflows belong to the Global Governor.
+
+## Strategies
+
+Writing strategy is first-class and separate from the workflow itself. Different authors and books can use fundamentally different approaches to planning, discovery, drafting, research and revision.
+
+Reusable strategy examples live under [`strategies/`](strategies/):
+
+- [`outline-first.md`](strategies/outline-first.md)
+- [`discovery-writing.md`](strategies/discovery-writing.md)
+
+Named author-inspired strategies may be added when they are grounded in documented practices rather than stereotypes.
+
+The Workflow Strategist selects, combines, adapts or creates a strategy for the particular book. The selected strategy then shapes the concrete flow/pipeline. The pipeline is therefore an execution consequence of strategy, not the definition of Book Writing itself.
+
+Conceptually:
+
+`Book Writing Workflow + available roles + selected strategy -> Strategist-defined/adapted flow -> execution agents -> events/evidence -> strategy/flow adjustment`
 
 ## Candidate execution roles
 
-A runtime may compose ephemeral agents from common or future reusable roles such as:
+A runtime may compose ephemeral agents such as Researcher, Outliner/Architect, Writer, Editor and Reviewer. These are `SESSION` agents by default. They receive only the manuscript context and strategic-memory projection needed for the current task. Useful decisions/evidence flow back to the Workflow Strategist.
 
-- Researcher — gather and verify bounded source material.
-- Outliner / Architect — develop structure, chapter progression and argument/story shape.
-- Writer — produce bounded manuscript sections in the established voice and constraints.
-- Editor — improve clarity, coherence, pacing and consistency without silently changing intent.
-- Reviewer — challenge continuity, unsupported claims, contradictions and quality gaps.
+## Flow and events
 
-These are `SESSION` agents by default. They receive only the manuscript context and strategic-memory projection needed for their current task. Useful decisions, evidence and outcomes return to the Workflow Strategist rather than becoming permanent personal memory of an execution agent.
+The workflow connects work through events and a concrete flow, but does not prescribe one universal sequence. The Strategist derives/adapts that flow from the selected strategy and current evidence.
 
-## Example flow
-
-`intent/research -> book strategy -> outline -> chapter work -> review/edit -> continuity check -> manuscript`
-
-The exact flow is not required to be linear. Research, outlining, drafting and revision may iterate while the Workflow Strategist preserves continuity and records consequential decisions.
+For example, an outline-first strategy may make outline validation an early gate, while discovery writing may intentionally draft before detailed structure and introduce stronger continuity/restructure loops later.
 
 ## Memory boundary
 
-Book/project memory belongs to the workflow, not to individual Writer or Editor agents. See [`_common/memory.md`](../_common/memory.md).
-
-Typical durable memory includes:
-
-- premise, audience and intended outcome;
-- themes and constraints;
-- outline and structural decisions;
-- voice/style decisions;
-- research findings and provenance;
-- characters, concepts, terminology and continuity facts;
-- editorial decisions and rationale;
-- rejected approaches worth remembering;
-- review findings and resulting lessons.
-
-Raw manuscript/source files remain authoritative artifacts and should not be replaced by extracted memory summaries.
+Book/project memory belongs to the workflow, not individual Writer or Editor agents. See [`_common/memory.md`](../_common/memory.md). Raw manuscript/source files remain authoritative artifacts and are not replaced by extracted memory summaries.
 
 ## Runtime boundary
 
-The workflow declares roles, relationships, memory requirements and process constraints. The runtime/profile chooses concrete models, providers, harnesses, tools and memory implementations.
+The workflow declares its domain, possible roles/capabilities, events, memory requirements and boundaries. The Strategist determines/adapts strategy and flow. The runtime/profile chooses concrete models, providers, harnesses, tools and memory implementations.
