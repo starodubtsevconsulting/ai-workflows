@@ -24,6 +24,14 @@ Meaningful events may include market/session open, candidate signal, setup quali
 
 The Strategist connects events into the concrete flow required by the selected strategy while preserving hard risk/authorization boundaries.
 
+## Connected commands
+
+Commands are defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
+
+| Command | Reference | Used by / purpose |
+| --- | --- | --- |
+| None yet | — | Commands will be connected as the workflow is implemented. |
+
 ## Risk and execution boundary
 
 Research/analysis and actual brokerage execution are separate capabilities. A runtime MUST NOT infer permission to place trades merely because an agent can analyze markets or can technically access a broker integration. Any real-money execution capability requires explicit private profile/runtime authorization and bounded risk controls.
