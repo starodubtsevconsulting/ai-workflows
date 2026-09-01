@@ -4,6 +4,31 @@ This document defines the common contract for reusable roles.
 
 A role is a reusable responsibility/behavior definition. A runtime agent is an implementation/instance of a role inside a particular workflow/profile.
 
+## Human-facing `why.md`
+
+Every reusable role MUST have a companion human-facing `why.md` explanation.
+
+The normative role definition is written primarily for AI/runtime consumption: compact, explicit and rule-oriented. `why.md` exists for a person who asks **why this role exists at all**.
+
+`role definition = what it is / what it must do`
+
+`why.md = why we introduced it / what problem it solves`
+
+`why.md` is explanatory and non-normative. It may be relaxed and story-like. It MAY include examples, analogies, diagrams/images/animations, historical context, trade-offs, external references and links to related roles/commands/workflows.
+
+A good `why.md` should let someone understand the design decision without first learning the complete agent architecture. For example it may begin with an imagined situation: "Imagine a high-level agent knows what outcome it wants, but has no idea which operational command should perform it..."
+
+Rules:
+
+- every reusable role has a human-facing `why.md`;
+- keep normative authority in the role/spec files, not `why.md`;
+- do not duplicate the full role contract into `why.md`;
+- explain motivation, problem and important trade-offs in ordinary human language;
+- references/media are welcome when they improve understanding;
+- when role behavior changes materially, check whether its explanation is still true.
+
+Current flat role layout may use `<role>.why.md` beside `<role>.md`. A future folder-per-role layout may use `role.md` + `why.md`; either representation preserves the same conceptual contract.
+
 ## Required role properties
 
 Every role definition MUST contain a Properties section with at least `level`, `human-facing`, `interaction-mode`, `memory-class`, and `lifecycle`.
@@ -16,7 +41,7 @@ Every role MUST contain a prompt/intent scenario table, even when empty.
 | --- | --- | --- |
 |  |  |  |
 
-Reusable roles describe recognized intent, not workflow-specific peers/commands/orchestration. When workflow routing is required, the runtime agent consults its active workflow/team definition.
+Reusable roles describe recognized intent, not workflow-specific peers/commands/orchestration. When workflow routing is required, runtime agent consults active workflow/team definition.
 
 `Role = understands responsibility/intent`
 
@@ -26,31 +51,17 @@ Reusable roles describe recognized intent, not workflow-specific peers/commands/
 
 ## Inherited agent communication and trust
 
-Every runtime agent implementing any role automatically inherits the common [`_common/communication.md`](_common/communication.md) protocol. Individual role files MUST NOT duplicate the common protocol unless documenting a role-specific exception/additional restriction.
+Every runtime agent implementing any role automatically inherits [`_common/communication.md`](_common/communication.md). Individual role files MUST NOT duplicate common protocol unless documenting role-specific exception/restriction.
 
-This inheritance includes:
-
-- identity envelope;
-- authoritative runtime-roster identity validation;
-- unknown/stale agent IDs are untrusted by default;
-- receiver-side communication authorization;
-- `IDENTIFY -> AUTHENTICATE -> AUTHORIZE -> COPY -> work -> REPORT BACK`;
-- auditability of unauthorized communication attempts;
-- communication never broadens capability/command authority.
-
-Therefore role implementations do not need repeated prose such as "verify sender ID". It is already part of being an Agent.
+This includes identity envelope, runtime-roster validation, unknown/stale IDs untrusted by default, receiver-side authorization, `IDENTIFY -> AUTHENTICATE -> AUTHORIZE -> COPY -> work -> REPORT BACK`, auditability and no authority broadening.
 
 ## Team/runtime separation
 
-Reusable roles do not own concrete team membership.
-
-The workflow defines the **static team contract**: available roles/agent realizations, capabilities, communication relationships, command access and workflow routing.
-
-The runtime maintains the **dynamic team roster**: which concrete runtime `agent_id` currently occupies each team slot/role instance.
+Reusable roles do not own concrete team membership. Workflow defines static Team contract; runtime maintains dynamic roster mapping concrete IDs to team slots/instances.
 
 `Role spec -> workflow team policy -> runtime roster -> agent communication`
 
-A role can be instantiated more than once (for example `Coder 1`, `Coder 2`). Each instance has its own ID and must be registered in the runtime roster.
+Multiple instances of one role are allowed and separately registered.
 
 ## Command authority — not granted by default
 
@@ -90,6 +101,8 @@ Workflow-specific peer relationships/orchestration belong to workflow/team defin
 
 - [ ] Purpose/responsibility is defined.
 - [ ] Required Properties are declared.
+- [ ] Companion human-facing `why.md` exists.
+- [ ] `why.md` explains motivation without becoming normative duplicate.
 - [ ] Prompt/intent scenario table exists even if empty.
 - [ ] Role prompt scenarios describe intent, not workflow orchestration.
 - [ ] Common communication/trust protocol is inherited rather than duplicated.
