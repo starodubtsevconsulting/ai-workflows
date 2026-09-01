@@ -6,11 +6,13 @@ This document defines the common contract and repository structure for every reu
 
 A workflow represents a reusable human or business activity. It is not an agent, model, harness, product, organization or one fixed pipeline.
 
+A **flow** is a bounded process inside a workflow. One workflow may contain many flows.
+
 Conceptually:
 
-`Prompt/Event -> Workflow routing -> Role/Agent or Command -> Flow -> Outcomes/Evidence`
+`Prompt/Event -> Workflow routing -> Flow / Role / Strategist / Command -> Outcomes/Evidence`
 
-`Workflow + Roles + Strategy + Memory + Events + Commands -> adaptive Flow -> runtime Agents -> Outcomes/Evidence`
+`Workflow + Roles + Strategy + Memory + Events + Commands + Flows -> runtime Agents -> Outcomes/Evidence`
 
 A Workflow Strategist owns domain continuity and determines/adapts strategy and flow. The Global Governor sits above workflows and owns cross-workflow WHY/WHEN, allocation and human-aware strategy.
 
@@ -30,6 +32,8 @@ A workflow MAY additionally contain:
 <workflow-id>/
   strategies/
     <strategy>.md
+  flows/
+    <flow>.md
   roles/
     <workflow-specific-role>.md
   examples/
@@ -46,7 +50,7 @@ Required human-facing entry point. It MUST explain, briefly:
 - what activity/business process the workflow represents;
 - the intended outcome;
 - where to read the full contract (`workflow.md`);
-- important workflow-specific entry points such as `strategies/` when present.
+- important workflow-specific entry points such as `strategies/` and `flows/` when present.
 
 README is orientation, not the mechanical contract.
 
@@ -80,14 +84,29 @@ Strategy describes HOW this kind of work should be approached for a particular o
 
 When reusable strategies exist they SHOULD live in `strategies/`. The Strategist may select, combine, adapt or create strategy rather than blindly executing a named strategy file.
 
-### Events and flow
-A workflow MUST identify the meaningful events/state changes that connect work. It MUST allow those events to form a concrete flow/pipeline.
+### Flows and events
 
-The workflow SHOULD NOT assume that one static pipeline is universally correct unless that is an inherent domain constraint. The Workflow Strategist uses the selected strategy and evidence to derive/adapt the concrete flow.
+A flow is a bounded process inside a workflow. Examples in Software Development include implementation, testing, debugging, review and release.
+
+When a workflow has reusable named flows they SHOULD live under `flows/<flow>.md`. A flow SHOULD define its purpose/intent examples, meaningful events or states, expected outcome, and any important role/command boundaries.
+
+A workflow MUST identify meaningful events/state changes that connect work. Strategy may alter how a flow is executed: its sequence, gates, participating roles, commands or iteration loops.
+
+Therefore:
+
+**Workflow** = long-lived domain/activity.
+
+**Strategy** = HOW that domain should currently be approached.
+
+**Flow** = bounded process used inside the workflow.
+
+**Event** = fact/state change connecting steps and flows.
 
 Conceptually:
 
-`event -> state/decision -> role/action/command -> result event`
+`event -> flow/state/decision -> role/action/command -> result event`
+
+A flow MAY invoke another flow. For example, Debugging may route a correction into Implementation and verification into Testing.
 
 ### Prompt routing / use cases
 
@@ -100,13 +119,13 @@ A prompt MAY route:
 1. directly to a connected AI Command;
 2. to a role/agent, which may then select/invoke one or more commands it is authorized to use;
 3. to the Workflow Strategist when strategy, ambiguity, sequencing or cross-step reasoning is required;
-4. into a workflow flow/event rather than a single command.
+4. to a named flow inside the current workflow.
 
 Required table shape:
 
 | Example prompt / intent | Route type | Route target | Result / notes |
 | --- | --- | --- | --- |
-| `<natural-language example>` | `command` / `role` / `strategist` / `flow` | command ID, role name, or flow/event | expected interpretation |
+| `<natural-language example>` | `command` / `role` / `strategist` / `flow` | command ID, role name, strategist, or flow | expected interpretation |
 
 The table SHOULD contain several natural-language variants where useful. These are examples/semantic mappings, not exact phrases that users must type.
 
@@ -115,11 +134,15 @@ Example for Software Development:
 | Example prompt / intent | Route type | Route target | Result / notes |
 | --- | --- | --- | --- |
 | “Push these changes.” | command | `source-control` | Direct bounded source-control operation when context/authorization is sufficient. |
-| “Check the new ticket.” | role | `Manager` | Manager interprets the ticket-management task and may invoke the connected ticket-tracker command. |
-| “Let's code this.” | flow | implementation flow | Route into the development flow; the Strategist/appropriate role determines the required design, coding and review steps. |
-| “What should we build first?” | strategist | `Workflow Strategist` | Requires prioritization/strategy rather than a direct command. |
+| “Check the new ticket.” | role | `Manager` | Manager interprets the responsibility and may invoke a connected ticket-tracker command. |
+| “Let's code this.” | flow | `implementation` | Enter the bounded implementation flow inside Software Development. |
+| “Test this change.” | flow | `testing` | Enter the testing flow. |
+| “Why is this failing?” | flow | `debugging` | Enter the debugging/investigation flow. |
+| “Review this PR.” | flow | `review` | Enter independent review. |
+| “Let's release it.” | flow | `release` | Enter release/readiness flow. |
+| “What should we build first?” | strategist | `Workflow Strategist` | Requires prioritization/strategy rather than a direct bounded operation. |
 
-A role route is deliberately different from a command route. The role owns reasoning/responsibility and may use commands as bounded capabilities. For example:
+A role route is deliberately different from a command route. The role owns reasoning/responsibility and may use commands as bounded capabilities.
 
 `prompt -> Manager agent -> ticket-tracker command -> result -> Manager interpretation`
 
@@ -131,7 +154,7 @@ If a workflow has no implemented mappings yet, the section/table is still REQUIR
 
 ### Connected commands
 
-Every `workflow.md` MUST contain a **Connected commands** table listing commands that the workflow can call directly or make available to its authorized roles.
+Every `workflow.md` MUST contain a **Connected commands** table listing commands that the workflow can call directly or make available to its authorized roles/flows.
 
 Commands are reusable bounded actions defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands). A workflow references a command rather than duplicating its specification or implementation.
 
@@ -145,18 +168,12 @@ When commands are connected:
 
 - use the canonical command identifier/path from `ai-commands`;
 - link to the command definition in the AI Commands repository;
-- describe why/where the workflow or role may invoke it;
+- describe why/where the workflow, role or flow may invoke it;
 - do not duplicate the command's internal specification;
 - runtime/profile configuration may further restrict command availability and authorization;
 - declaring a command does not grant credentials or bypass runtime safety/permission boundaries.
 
 The section and table are REQUIRED even when the workflow currently has no connected commands.
-
-**Command** = bounded reusable action.
-
-**Role/Agent** = responsibility/reasoning boundary that may use commands.
-
-**Workflow** = continuing activity that composes roles, strategy, memory, events, routing, flow and connected commands.
 
 ### Memory
 The workflow MUST declare its memory semantics using [`_common/memory.md`](_common/memory.md).
@@ -200,9 +217,9 @@ These are intentionally different concepts.
 
 **Strategy** = philosophy/approach for achieving the workflow objective under current conditions.
 
-**Flow** = concrete sequence/graph of events, decisions and actions currently used to execute that strategy.
+**Flow** = bounded concrete process/sequence/graph of events, decisions and actions inside that workflow.
 
-Changing strategy may change the flow. Evidence from the flow may cause the Strategist to change strategy.
+Changing strategy may change a flow. Evidence from a flow may cause the Strategist to change strategy. A workflow can have many flows simultaneously available.
 
 ## Portability rule
 
@@ -221,7 +238,8 @@ A new workflow is structurally complete when:
 - [ ] Workflow Strategist relationship is defined;
 - [ ] roles/composition are defined;
 - [ ] strategy semantics are defined;
-- [ ] events and adaptive flow semantics are defined;
+- [ ] flow/event semantics are defined;
+- [ ] reusable named flows are placed under `flows/` when present;
 - [ ] Prompt routing / use cases table exists;
 - [ ] Connected commands table exists and references `ai-commands`;
 - [ ] memory class/boundary is defined;
