@@ -10,9 +10,11 @@ A **flow** is a bounded process inside a workflow. One workflow may contain many
 
 Conceptually:
 
-`Prompt/Event -> Workflow routing -> Flow / Role / Strategist / Command -> Outcomes/Evidence`
+`Role definition -> workflow agents.md realization -> runtime agent`
 
-`Workflow + Roles + Strategy + Memory + Events + Commands + Flows -> runtime Agents -> Outcomes/Evidence`
+`Prompt/Event -> Workflow routing -> Flow / Agent / Strategist / Command -> Outcomes/Evidence`
+
+`Workflow + Roles + Agent realizations + Strategy + Memory + Events + Commands + Flows -> runtime Agents -> Outcomes/Evidence`
 
 A Workflow Strategist owns domain continuity and determines/adapts strategy and flow. The Global Governor sits above workflows and owns cross-workflow WHY/WHEN, allocation and human-aware strategy.
 
@@ -24,6 +26,7 @@ Every concrete workflow MUST be a top-level folder and MUST contain:
 <workflow-id>/
   README.md
   workflow.md
+  agents.md
 ```
 
 A workflow MAY additionally contain:
@@ -34,65 +37,70 @@ A workflow MAY additionally contain:
     <strategy>.md
   flows/
     <flow>.md
-  roles/
-    <workflow-specific-role>.md
   examples/
   tests/
   adapters/
 ```
 
-Reusable cross-workflow definitions belong under `_common/`, not inside one workflow.
+Reusable role definitions belong under `_common/roles/`. Workflows SHOULD NOT duplicate reusable role definitions in local role MD files. They realize/specialize those roles through `agents.md`.
 
 ## README.md
 
-Required human-facing entry point. It MUST explain, briefly:
+Required human-facing entry point. It MUST explain, briefly, what activity/business process the workflow represents, the intended outcome, where to read the full contract (`workflow.md`), and important workflow-specific entry points such as `strategies/` and `flows/` when present.
 
-- what activity/business process the workflow represents;
-- the intended outcome;
-- where to read the full contract (`workflow.md`);
-- important workflow-specific entry points such as `strategies/` and `flows/` when present.
+## agents.md
 
-README is orientation, not the mechanical contract.
+Every workflow MUST contain `agents.md`. It is the workflow's declarative agent-realization table: which reusable roles exist as agents in this workflow and the default runtime properties suggested for them.
+
+It does NOT duplicate the role definition. The role remains authoritative for responsibility/behavior. `agents.md` specializes how that role should normally be realized in this workflow.
+
+Required table:
+
+| Agent | Role | Human-facing override | Intelligence | Reasoning | Context | Memory | Lifecycle | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  |  |  |  |  |
+
+Semantics:
+
+- **Agent** — workflow-local agent name/identity.
+- **Role** — link/reference to the reusable role under `_common/roles/`.
+- **Human-facing override** — optional override of the role default; blank means inherit.
+- **Intelligence** — relative capability requirement such as `low`, `medium`, `high`, `highest-available`; this is provider/model independent.
+- **Reasoning** — suggested reasoning effort such as `low`, `medium`, `high`.
+- **Context** — suggested context requirement such as `small`, `medium`, `large`, `largest-available`.
+- **Memory** — memory requirement/class; may include optional external memory where continuity requires it.
+- **Lifecycle** — persistent or ephemeral/session behavior, overriding only when explicitly intended.
+- **Notes** — workflow-specific realization details.
+
+These values are defaults/hints, not bindings to a particular model/provider. Runtime infrastructure maps them to available concrete models, context sizes, reasoning controls and memory implementations.
+
+For example, a Coder may use medium intelligence/reasoning and be replaced frequently between bounded tasks, while a Designer Reviewer may require high intelligence/reasoning, large context and optional external continuity because it must preserve design intent through later implementation review.
+
+If the workflow has no defined agent realizations yet, `agents.md` MUST still exist with the header and one empty row.
+
+Conceptually:
+
+`Reusable Role defaults + agents.md specialization + Profile/runtime policy -> concrete Agent`
+
+A change to a reusable role SHOULD trigger review of all `agents.md` realizations referencing that role.
 
 ## workflow.md
 
-Required authoritative workflow contract. It MUST define or explicitly address:
-
-### Purpose and boundary
-- what the workflow does;
-- what outcome it is responsible for;
-- what is outside its scope.
-
-### Strategic layer
-- how the Workflow Strategist participates;
-- what persistent domain continuity/memory it requires;
-- what decisions belong to the Strategist;
-- what must be escalated to the Global Governor.
+Required authoritative workflow contract. It MUST define purpose/boundary, strategic layer, roles/composition, strategies, flows/events, prompt routing, connected commands, memory, inputs/outputs/evidence, runtime and privacy boundaries.
 
 ### Roles and composition
-- which reusable/common roles may be selected;
-- any workflow-specific roles;
-- responsibilities/capability boundaries at the workflow level;
-- which roles are persistent vs ephemeral.
 
-Roles are definitions. Runtime agents are realizations of roles. A workflow composes agent profiles from roles rather than treating stored agent instances as the source abstraction.
+`workflow.md` describes which responsibilities participate and how they interact. Concrete workflow-local agent realization belongs in `agents.md`.
+
+Roles are reusable definitions. Agents are workflow/profile/runtime realizations of roles.
 
 ### Strategies
-A workflow MUST support the concept of strategy even when it publishes no reusable strategy files yet.
 
-Strategy describes HOW this kind of work should be approached for a particular objective/context. Different strategies may produce very different flows for the same workflow.
-
-When reusable strategies exist they SHOULD live in `strategies/`. The Strategist may select, combine, adapt or create strategy rather than blindly executing a named strategy file.
+A workflow MUST support strategy even when it publishes no reusable strategy files yet. Strategy describes HOW this kind of work should be approached for a particular objective/context. Different strategies may produce different flows.
 
 ### Flows and events
 
-A flow is a bounded process inside a workflow. Examples in Software Development include implementation, testing, debugging, review and release.
-
-When a workflow has reusable named flows they SHOULD live under `flows/<flow>.md`. A flow SHOULD define its purpose/intent examples, meaningful events or states, expected outcome, and any important role/command boundaries.
-
-A workflow MUST identify meaningful events/state changes that connect work. Strategy may alter how a flow is executed: its sequence, gates, participating roles, commands or iteration loops.
-
-Therefore:
+A flow is a bounded process inside a workflow. Reusable named flows SHOULD live under `flows/<flow>.md`. Strategy may alter sequence, gates, participating agents, commands and iteration loops.
 
 **Workflow** = long-lived domain/activity.
 
@@ -100,149 +108,68 @@ Therefore:
 
 **Flow** = bounded process used inside the workflow.
 
+**Role** = reusable responsibility definition.
+
+**Agent** = workflow/runtime realization of a role.
+
+**Command** = bounded reusable action.
+
 **Event** = fact/state change connecting steps and flows.
-
-Conceptually:
-
-`event -> flow/state/decision -> role/action/command -> result event`
-
-A flow MAY invoke another flow. For example, Debugging may route a correction into Implementation and verification into Testing.
 
 ### Prompt routing / use cases
 
-Every `workflow.md` MUST contain a **Prompt routing / use cases** table. This is the human-language routing contract: examples of what a person might ask and how the workflow interprets/routes that intent.
-
-It is intentionally similar in spirit to an MCP/tool routing description, but represented as readable Markdown and owned by the workflow.
-
-A prompt MAY route:
-
-1. directly to a connected AI Command;
-2. to a role/agent, which may then select/invoke one or more commands it is authorized to use;
-3. to the Workflow Strategist when strategy, ambiguity, sequencing or cross-step reasoning is required;
-4. to a named flow inside the current workflow.
-
-Required table shape:
+Every `workflow.md` MUST contain a **Prompt routing / use cases** table.
 
 | Example prompt / intent | Route type | Route target | Result / notes |
 | --- | --- | --- | --- |
-| `<natural-language example>` | `command` / `role` / `strategist` / `flow` | command ID, role name, strategist, or flow | expected interpretation |
+|  |  |  |  |
 
-The table SHOULD contain several natural-language variants where useful. These are examples/semantic mappings, not exact phrases that users must type.
-
-Example for Software Development:
-
-| Example prompt / intent | Route type | Route target | Result / notes |
-| --- | --- | --- | --- |
-| “Push these changes.” | command | `source-control` | Direct bounded source-control operation when context/authorization is sufficient. |
-| “Check the new ticket.” | role | `Manager` | Manager interprets the responsibility and may invoke a connected ticket-tracker command. |
-| “Let's code this.” | flow | `implementation` | Enter the bounded implementation flow inside Software Development. |
-| “Test this change.” | flow | `testing` | Enter the testing flow. |
-| “Why is this failing?” | flow | `debugging` | Enter the debugging/investigation flow. |
-| “Review this PR.” | flow | `review` | Enter independent review. |
-| “Let's release it.” | flow | `release` | Enter release/readiness flow. |
-| “What should we build first?” | strategist | `Workflow Strategist` | Requires prioritization/strategy rather than a direct bounded operation. |
-
-A role route is deliberately different from a command route. The role owns reasoning/responsibility and may use commands as bounded capabilities.
-
-`prompt -> Manager agent -> ticket-tracker command -> result -> Manager interpretation`
-
-versus:
-
-`prompt -> source-control command -> bounded result`
-
-If a workflow has no implemented mappings yet, the section/table is still REQUIRED with a `TBD` row.
+A prompt may route directly to a command, to an agent/role, to the Workflow Strategist, or to a named flow. Examples are semantic mappings rather than exact required phrases.
 
 ### Connected commands
 
-Every `workflow.md` MUST contain a **Connected commands** table listing commands that the workflow can call directly or make available to its authorized roles/flows.
-
-Commands are reusable bounded actions defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands). A workflow references a command rather than duplicating its specification or implementation.
-
-Required table shape:
+Every `workflow.md` MUST contain a **Connected commands** table referencing reusable commands from the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
 
 | Command | Reference | Used by / purpose |
 | --- | --- | --- |
 | None yet | — | Commands will be connected as the workflow is implemented. |
 
-When commands are connected:
-
-- use the canonical command identifier/path from `ai-commands`;
-- link to the command definition in the AI Commands repository;
-- describe why/where the workflow, role or flow may invoke it;
-- do not duplicate the command's internal specification;
-- runtime/profile configuration may further restrict command availability and authorization;
-- declaring a command does not grant credentials or bypass runtime safety/permission boundaries.
-
-The section and table are REQUIRED even when the workflow currently has no connected commands.
+The section/table remain required even when no commands exist yet. Runtime/profile authorization may further restrict any declared command.
 
 ### Memory
-The workflow MUST declare its memory semantics using [`_common/memory.md`](_common/memory.md).
 
-Typical model:
-- Global Governor: `GLOBAL_STRATEGIC`;
-- Workflow Strategist: `WORKFLOW_STRATEGIC`;
-- execution agents: `SESSION`.
-
-Durable memory belongs to scopes, not disposable model sessions. Original source artifacts remain authoritative where applicable.
-
-### Inputs, outputs and evidence
-The workflow MUST identify its meaningful inputs and expected outputs/outcomes. Derived facts or decisions SHOULD preserve provenance/evidence when the domain requires it.
+The workflow MUST declare memory semantics using [`_common/memory.md`](_common/memory.md). Typical model: Global Governor `GLOBAL_STRATEGIC`, Workflow Strategist `WORKFLOW_STRATEGIC`, execution agents `SESSION`, with explicitly declared external memory where required.
 
 ### Runtime boundary
-The workflow MUST remain independent of one concrete model, provider, harness or hosting implementation unless that dependency is intrinsic to the workflow itself. Profiles/runtime configuration resolve roles into concrete agents and supply credentials, tools, paths, integrations and providers.
+
+Workflow and `agents.md` remain provider independent. Runtime/profile configuration maps abstract intelligence/reasoning/context/memory requirements to concrete models, providers, harnesses, credentials, tools and integrations.
 
 ### Privacy boundary
-Reusable public workflow contracts MUST NOT contain client secrets, credentials, private financial/personal data, absolute private paths or organization-specific confidential configuration.
+
+Reusable public workflow contracts MUST NOT contain client secrets, credentials, private financial/personal data, absolute private paths or confidential organization-specific configuration.
 
 ## Common roles
 
-Reusable roles live under:
-
-```text
-_common/
-  roles/
-    global/
-    workflow/
-```
-
-`global/` contains roles above individual workflows, such as the Global Governor.
-
-`workflow/` contains reusable roles that workflows can compose, including the Workflow Strategist and execution roles.
-
-Workflow-specific roles may live inside the workflow only when they are not meaningfully reusable across workflows.
-
-## Strategy versus flow
-
-These are intentionally different concepts.
-
-**Strategy** = philosophy/approach for achieving the workflow objective under current conditions.
-
-**Flow** = bounded concrete process/sequence/graph of events, decisions and actions inside that workflow.
-
-Changing strategy may change a flow. Evidence from a flow may cause the Strategist to change strategy. A workflow can have many flows simultaneously available.
+Reusable roles live under `_common/roles/` and follow [`role.spec.md`](role.spec.md). Global and workflow-strategic roles may use their existing subfolders. Execution roles remain reusable definitions rather than duplicated workflow-local files.
 
 ## Portability rule
 
-A workflow definition should answer: "Could another profile/runtime use this workflow without inheriting one person's private environment?"
-
-If not, move environment-specific information into profile/runtime configuration or document it only as a sanitized example.
+A workflow definition should answer: "Could another profile/runtime use this workflow without inheriting one person's private environment?" If not, move environment-specific information into profile/runtime configuration or document it only as a sanitized example.
 
 ## Minimum acceptance checklist
-
-A new workflow is structurally complete when:
 
 - [ ] top-level workflow folder exists;
 - [ ] `README.md` exists;
 - [ ] `workflow.md` exists;
+- [ ] `agents.md` exists;
+- [ ] `agents.md` has the required agent-realization table, even if empty;
+- [ ] agent rows reference reusable roles rather than duplicating them;
 - [ ] purpose/outcome/boundary are defined;
 - [ ] Workflow Strategist relationship is defined;
-- [ ] roles/composition are defined;
 - [ ] strategy semantics are defined;
 - [ ] flow/event semantics are defined;
-- [ ] reusable named flows are placed under `flows/` when present;
 - [ ] Prompt routing / use cases table exists;
-- [ ] Connected commands table exists and references `ai-commands`;
-- [ ] memory class/boundary is defined;
-- [ ] inputs/outputs/evidence are defined;
+- [ ] Connected commands table exists;
+- [ ] memory boundary is defined;
 - [ ] runtime independence is defined;
 - [ ] privacy/publication boundary is defined.
