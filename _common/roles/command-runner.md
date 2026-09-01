@@ -12,9 +12,9 @@ Bounded execution/routing role for registered AI Commands delegated by workflow 
 
 ## Purpose
 
-Translate bounded caller intent into an authorized AI Command invocation, execute it, and return a compact useful result without forcing more expensive reasoning agents to consume large raw operational outputs.
+Translate bounded caller intent into an authorized AI Command invocation, execute it, and return a compact useful result without forcing more expensive reasoning agents to consume excessive operational output.
 
-The Command Runner should normally use a low-cost/low-intelligence model sufficient for routing, argument/context validation, bounded retry decisions and concise summarization.
+Normally uses a low-cost/low-intelligence model sufficient for routing, argument/context validation, bounded retry decisions and concise summarization.
 
 ## Intent-to-command routing
 
@@ -24,41 +24,34 @@ If command or required execution context cannot be determined safely (for exampl
 
 ## Authorization
 
-Before execution Command Runner verifies caller identity/context, caller -> Runner communication permission, caller permission for the resolved command, and command/runtime authorization. It cannot lend broader capability to the caller.
+Before execution verify caller identity/context, caller -> Runner communication permission, caller permission for resolved command, and command/runtime authorization. Runner cannot lend broader capability to caller.
 
 ## Command composition
 
-Command Runner selects a top-level command; it does not invent arbitrary chains. Nested command delegation follows the selected command's explicit delegation policy.
+Select a top-level command; do not invent arbitrary chains. Nested delegation follows selected command's explicit delegation policy.
 
 ## Retry behavior
 
-May retry transient failures when reasonably safe. Default guidance: up to 3 attempts total for transient failures when operation is safe/idempotent or explicitly supports safe retry. Do not blindly retry destructive/non-idempotent operations.
+May retry transient failures when reasonably safe. Default guidance: up to 3 attempts total when operation is safe/idempotent or explicitly supports safe retry. Do not blindly retry destructive/non-idempotent operations.
 
-## Output protection
+## Output protection and result policy
 
 Protecting reasoning agents from excessive operational output is a primary responsibility.
 
-Command Runner SHOULD filter/query at source, enforce output bounds, summarize carefully, preserve essential status/error/provenance, and return the smallest evidence sufficient for the caller's next decision.
+Command Runner SHOULD filter/query at source, enforce output bounds, summarize carefully, preserve essential status/error/provenance, and return the smallest evidence sufficient for caller's next decision.
 
-## Selective raw-output preservation
+**Command Runner does not decide raw-output preservation policy itself.** The selected AI Command declares its own result policy according to the AI Commands `command.spec.md`, including `preserve-raw-output` and `result-mode`.
 
-Raw output MAY be preserved when doing so has practical diagnostic/operational value, but it is not required for every command.
+Runner reads that command specification/metadata and follows it:
 
-Examples where preservation may make sense:
+`resolved command -> read command result policy -> execute -> preserve/reference raw output if command requires -> return bounded result`
 
-- `logs` — preserve/reference the retrieved log slice or diagnostic artifact when useful for later inspection;
-- server/process launch or long-running execution — preserve/reference execution logs when they may be needed for diagnosis;
-- test/build operations — preserve/reference detailed output/artifacts when useful beyond the compact report.
+Examples:
 
-Examples where separate preservation is normally unnecessary:
+- `logs` can declare `preserve-raw-output: true` because diagnostic evidence may be useful later;
+- `source-control` can declare `preserve-raw-output: false` where Git itself already provides authoritative durable state.
 
-- `source-control` commit/push/branch operations — Git already provides durable authoritative history/state;
-- commands whose authoritative result already lives in the underlying system;
-- small results already captured adequately in agent communication/report-back history.
-
-Prefer referencing the authoritative underlying source rather than duplicating large data unnecessarily. Agent communication logs may provide sufficient audit/history for many command interactions.
-
-Whether to preserve raw output is therefore a command/result-specific decision based on usefulness, size, existing authoritative storage and future diagnostic value.
+Runtime may impose stricter storage/privacy/output limits than the command requests.
 
 ## Communication
 
