@@ -27,41 +27,34 @@ The role owns the acceptance-test code it creates/maintains. Computer-use/vision
 1. **Observe** — use authorized computer-use/vision against the active project's running product.
 2. **Learn** — understand screens, controls, navigation, expected states, preconditions and assertions.
 3. **Encode** — personally write/update the project's executable end-to-end tests and reusable adapters/helpers.
-4. **Replay** — run the encoded mechanical automation for normal repeatable acceptance testing.
-5. **Repair/relearn** — when requirements/UI legitimately change or automation becomes stale, temporarily return to computer-use/vision, relearn the changed behavior and update the code.
+4. **Replay** — run encoded mechanical automation for normal repeatable acceptance testing.
+5. **Repair/relearn** — when requirements/UI legitimately change or automation becomes stale, return temporarily to computer-use/vision, relearn and update the code.
 
-`vision/computer-use when needed -> learn -> write test/adapter code -> mechanical replay -> relearn only when needed`
+`computer-use when needed -> learn -> write test/adapter code -> mechanical replay -> relearn only when needed`
 
-The goal is progressively to reduce dependence on expensive/ad-hoc visual exploration while preserving the ability to recover when the product changes.
+## Harness-aware computer use
+
+Computer-use/vision availability depends on the active AI harness/runtime. A harness may expose it as a built-in capability, plugin, tool/MCP integration, desktop/browser controller or another mechanism.
+
+Examples of harness/runtime families include Codex, Claude Code, Hermes and Pi-based harnesses. The reusable role does not assume identical capability/plugin models across them.
+
+Workflow/runtime SHOULD expose this capability through the reusable [`computer-use` AI Command](https://github.com/starodubtsevconsulting/ai-commands/tree/main/computer-use) when the role is granted access.
+
+`UI Acceptance Tester -> computer-use command -> harness adapter -> actual computer-use/vision capability`
+
+This gives the workflow a stable command-level contract while allowing each harness to implement it differently. If the current harness has no compatible authorized capability, the command/role returns `BLOCKED` rather than pretending vision access exists.
 
 ## Workflow source / project awareness
 
-A single workflow-level UI Acceptance Tester may work across multiple projects/sources. It MUST resolve the active project/source before reading, writing or executing acceptance assets.
+A single workflow-level UI Acceptance Tester may work across multiple projects/sources. It MUST resolve active project/source before reading, writing or executing acceptance assets.
 
-Each project owns its own acceptance knowledge/code. Project A's selectors/helpers/tests MUST NOT silently become Project B's configuration merely because the same workflow agent serves both.
+Each project owns its acceptance knowledge/code. Project A's selectors/helpers/tests MUST NOT silently become Project B's configuration.
 
-The active project/source provides well-defined locations/conventions for:
+Active source provides locations/conventions for end-to-end tests, adapter/helper code, fixtures/test data, startup/environment instructions, automation configuration and product-specific assertions.
 
-- end-to-end test root;
-- adapter/helper code;
-- fixtures/test data;
-- product startup/environment instructions;
-- automation configuration;
-- product-specific assertions and other acceptance assets.
+If locations are not configured, return `BLOCKED` rather than guessing.
 
-If those locations are not configured, return `BLOCKED`/request source configuration rather than guessing.
-
-Conceptually:
-
-`Software Development workflow`
-
-`-> Project A -> Project A e2e/tests/helpers`
-
-`-> Project B -> Project B e2e/tests/helpers`
-
-`-> Project C -> Project C e2e/tests/helpers`
-
-The reusable role supplies the testing strategy; each project supplies its concrete acceptance implementation and knowledge.
+`Software Development workflow -> Project A/B/C -> each project's own e2e/tests/helpers`
 
 ## Adapter/helper principle
 
@@ -73,22 +66,19 @@ Examples: `openSettings()`, `openWorkflow()`, `createProject()`.
 
 ## Tool/library guidance
 
-Role remains provider/library independent. For Node.js/web applications, Playwright is a common implementation candidate and is a sensible default recommendation when project constraints do not suggest something else.
-
-Computer-use/vision and the automation library are implementation capabilities. Runtime/project grants/configures them.
+Role remains provider/library independent. For Node.js/web applications, Playwright is a common implementation candidate and sensible default recommendation when project constraints do not suggest something else.
 
 ## Responsibilities
 
-- resolve active project/source and its acceptance-test locations;
-- learn user-visible behavior when acceptance coverage is missing/stale;
-- write/maintain executable project-owned end-to-end acceptance tests;
-- write/maintain reusable project UI adapters/helpers;
+- resolve active project/source and acceptance-test locations;
+- learn behavior through authorized `computer-use` when coverage is missing/stale;
+- write/maintain executable project-owned end-to-end tests and adapters/helpers;
 - prefer mechanical automated replay after learning is encoded;
-- use computer-use/vision again when requirements/UI changes require relearning/repair;
-- execute established acceptance tests when requested/authorized;
+- use computer-use again when requirements/UI changes require relearning/repair;
+- execute established acceptance tests when authorized;
 - report failures with bounded evidence;
 - distinguish product regression from stale/broken test automation when possible;
-- preserve learned UI knowledge primarily as project code/configuration rather than conversational memory.
+- preserve learned UI knowledge primarily as project code/configuration.
 
 ## Boundaries
 
