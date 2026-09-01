@@ -16,29 +16,33 @@ Every role definition MUST contain a **Properties** section with at least:
 | `memory-class` | Default memory class from `_common/memory.md`. |
 | `lifecycle` | Typical persistence: persistent or session/ephemeral. |
 
-## Command authority — deny by default
+## Command authority — not granted by default
 
-Every reusable role has **zero command authority by default**.
+Concrete commands are **not granted at the reusable role level**.
 
-A role definition describes responsibilities and behavior but MUST NOT implicitly grant access to AI Commands, shell/tools, integrations or external systems.
+This is a default, not a permanent prohibition. A workflow implementation may explicitly grant commands to an agent that realizes the role.
 
-When a role is realized as an agent inside a workflow, its command access MUST be resolved from that workflow's `team/command-matrix.csv` (and then further constrained by runtime/profile authorization).
+A role describes responsibilities and behavior but does not itself grant access to AI Commands, shell/tools, integrations or external systems.
 
-Therefore an implementation of any role MUST assume:
+When the role is realized as an agent, command access is resolved from the workflow's `team/command-matrix.csv` and then further constrained by runtime/profile authorization.
 
-`command not explicitly allowed for this workflow agent -> forbidden`
+Therefore:
+
+`command not explicitly granted to this workflow agent -> not allowed to execute`
+
+while:
+
+`command explicitly granted to this workflow agent -> eligible for execution, subject to runtime authorization`
 
 The permission chain is:
 
-`Role (zero grants) -> Workflow agent realization -> team/command-matrix.csv explicit allow -> Runtime/profile authorization -> Command execution`
+`Role (no command grants) -> Workflow agent realization -> command-matrix explicit grant -> Runtime/profile authorization -> Command execution`
 
-All gates must pass.
+An explicit `forbidden` entry has a stronger/documentary meaning: the workflow intentionally declares that command as a no-go for that agent. Omission simply means **not granted**.
 
-A role MAY describe the kinds of capabilities it conceptually needs (for example, Manager coordinates ticket operations), but that statement is not permission to invoke `ticket-tracker`. The concrete Software Development Manager receives that permission only because its workflow command matrix explicitly grants it.
+A role MAY describe conceptual capabilities it needs. For example, Manager coordinates ticket operations. That does not itself grant `ticket-tracker`; a concrete workflow Manager receives it only when the workflow command matrix grants it.
 
-Every agent implementation MUST be connected to/evaluate its effective command policy before invoking a command directly or through Command Runner. Command Runner MUST evaluate the caller's policy and cannot lend its own broader command access to another agent.
-
-Explicit `forbidden` entries are useful for important boundaries, but omission remains denial.
+Every agent implementation MUST evaluate its effective command policy before invoking a command directly or through Command Runner. Command Runner evaluates the caller's policy and cannot lend its own broader access to another agent.
 
 ## Human participant
 
@@ -94,5 +98,6 @@ Every role SHOULD define Purpose/responsibility, Properties, Responsibilities, B
 - [ ] boundaries are defined.
 - [ ] human interaction expectations are defined.
 - [ ] role itself grants no concrete commands.
-- [ ] role implementations assume commands are forbidden unless explicitly allowed by workflow policy.
+- [ ] role implementations treat unlisted commands as not granted unless workflow policy explicitly grants them.
+- [ ] `forbidden` is reserved for intentional explicit no-go declarations.
 - [ ] workflows represent Human routing where applicable.
