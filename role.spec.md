@@ -16,47 +16,63 @@ Every role definition MUST contain a **Properties** section with at least:
 | `memory-class` | Default memory class from `_common/memory.md`. |
 | `lifecycle` | Typical persistence: persistent or session/ephemeral. |
 
+## Command authority — deny by default
+
+Every reusable role has **zero command authority by default**.
+
+A role definition describes responsibilities and behavior but MUST NOT implicitly grant access to AI Commands, shell/tools, integrations or external systems.
+
+When a role is realized as an agent inside a workflow, its command access MUST be resolved from that workflow's `team/command-matrix.csv` (and then further constrained by runtime/profile authorization).
+
+Therefore an implementation of any role MUST assume:
+
+`command not explicitly allowed for this workflow agent -> forbidden`
+
+The permission chain is:
+
+`Role (zero grants) -> Workflow agent realization -> team/command-matrix.csv explicit allow -> Runtime/profile authorization -> Command execution`
+
+All gates must pass.
+
+A role MAY describe the kinds of capabilities it conceptually needs (for example, Manager coordinates ticket operations), but that statement is not permission to invoke `ticket-tracker`. The concrete Software Development Manager receives that permission only because its workflow command matrix explicitly grants it.
+
+Every agent implementation MUST be connected to/evaluate its effective command policy before invoking a command directly or through Command Runner. Command Runner MUST evaluate the caller's policy and cannot lend its own broader command access to another agent.
+
+Explicit `forbidden` entries are useful for important boundaries, but omission remains denial.
+
 ## Human participant
 
-Every workflow starts from or ultimately serves a **Human** participant. The Human is not an AI agent and does not need to be implemented as a reusable AI role, but MUST be represented in the workflow team's communication/capability model whenever human interaction exists.
+Every workflow starts from or ultimately serves a Human participant. Human is not an AI agent but MUST be represented in workflow team communication/capability modeling when human interaction exists.
 
-The Human interacts with the workflow through one or more agents whose effective `human-facing` property is `true`.
-
-The Human's practical organizational perspective may vary by workflow/profile/session. For example, the same human may participate as a developer/designer in one Software Development profile, as a CEO/product owner in another, or as the final decision-maker above the Workflow Strategist. This does not require cloning the Human into an AI role.
-
-A useful model is:
+Human interacts through agents whose effective `human-facing` property is true. The same human may participate from different organizational perspectives depending on workflow/profile/session.
 
 `Human -> human-facing Agent(s) -> non-human-facing Agents / Commands / Flows`
 
-If multiple agents are human-facing, the Human may interact with any/all of them as allowed by the workflow/profile. Non-human-facing agents are reached through routing/delegation rather than direct conversation by default.
-
-The Human remains the final authority over their goals and may override/cancel workflow objectives subject to runtime safety/authorization boundaries.
+Human remains final authority over their goals subject to runtime safety/authorization boundaries.
 
 ## Human-facing semantics
 
-`human-facing` is a DEFAULT characteristic of the reusable role, not an immutable permission. A concrete workflow/profile MAY override this default when realizing the role as an agent.
+`human-facing` is a default characteristic, not immutable permission. A workflow/profile may explicitly override it.
 
 `true` means normally directly addressable by a human in an appropriate context. `false` means normally reached through another agent, flow or routing layer.
 
-For example, a Software Development Human may talk directly to a Designer Reviewer while the Designer Reviewer asks a non-human-facing Manager to retrieve or create a ticket.
-
 ## Interaction mode
 
-- `reactive` — acts when invoked/routed by a human, role, flow, event, or schedule.
-- `proactive` — may initiate work/communication when its mandate/runtime allow it.
+- `reactive` — acts when invoked/routed by human, role, flow, event or schedule.
+- `proactive` — may initiate work/communication when mandate/runtime allow it.
 - `mixed` — supports both.
 
-Interaction mode does not grant tool/command/autonomy permission.
+Interaction mode does not grant command/tool/autonomy permission.
 
 ## Override rule
 
-Reusable role properties are defaults. Workflow/profile specialization may override them explicitly but SHOULD NOT silently broaden authority, privacy access, command permissions, or memory scope.
+Reusable role properties are defaults. Workflow/profile specialization may override them explicitly but SHOULD NOT silently broaden authority, privacy access, command permissions or memory scope.
 
 `Role defaults + Workflow specialization + Profile/runtime policy -> Agent profile/instance`
 
 ## Required role sections
 
-Every role SHOULD define Purpose/responsibility, Properties, Responsibilities, Boundaries, Memory/lifecycle behavior, Human interaction expectations, relationships to other roles where relevant, and command/tool authority where relevant.
+Every role SHOULD define Purpose/responsibility, Properties, Responsibilities, Boundaries, Memory/lifecycle behavior, Human interaction expectations, relationships to other roles where relevant, and conceptual command/tool needs where relevant. Concrete command grants belong to workflow `team/command-matrix.csv`, never the reusable role.
 
 ## Example defaults
 
@@ -74,12 +90,9 @@ Every role SHOULD define Purpose/responsibility, Properties, Responsibilities, B
 
 - [ ] Purpose/responsibility is defined.
 - [ ] Properties section exists.
-- [ ] `level` is declared.
-- [ ] `human-facing` default is declared.
-- [ ] `interaction-mode` is declared.
-- [ ] `memory-class` is declared.
-- [ ] `lifecycle` is declared.
+- [ ] `level`, `human-facing`, `interaction-mode`, `memory-class`, `lifecycle` are declared.
 - [ ] boundaries are defined.
 - [ ] human interaction expectations are defined.
-- [ ] overrides are explicit.
-- [ ] workflows represent Human routing in team matrices where applicable.
+- [ ] role itself grants no concrete commands.
+- [ ] role implementations assume commands are forbidden unless explicitly allowed by workflow policy.
+- [ ] workflows represent Human routing where applicable.
