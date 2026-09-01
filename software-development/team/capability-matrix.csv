@@ -5,10 +5,30 @@ Human,judge conversation,allowed,Only Human may directly invoke Judge by default
 Human,ticket tracker access,denied,Uses human-facing agent which delegates ticket operations to Manager
 Strategist,workflow strategy,owner,Owns durable development strategy and continuity
 Strategist,strategic memory,owner,Controls durable strategic context and disclosure according to policy/Human authorization
-Judge,governance rule changes,owner,Only Judge changes AI workflow/AI command governance rules when Human authorizes
+Judge,AI Workflows read,allowed,May inspect governance workflow definitions rules agents teams matrices and specs
+Judge,AI Workflows modify,owner,Primary authority for authorized changes to AI Workflows governance artifacts
+Judge,AI Commands read,allowed,May inspect AI Command definitions and governance
+Judge,AI Commands modify,owner,Primary authority for authorized changes to AI Commands governance artifacts
+Judge,agent definition modify,owner,May modify agents.md and related workflow governance/team configuration
+Judge,team matrix modify,owner,May modify capability communication and command matrices as governance artifacts
+Judge,product source code read,denied,Does not inspect product implementation source code
+Judge,product source code modify,denied,Does not implement product code
+Judge,product specification read,denied,Product/domain design is outside Judge governance scope by default
+Judge,product specification modify,denied,Does not change product/domain design specifications
+Judge,agent conversation history inspect,allowed,May inspect agent conversation/session history for compliance evaluation
 Judge,rule compliance review,owner,Checks whether agents follow governing rules
+Judge,rule validation tests,allowed,May execute governance validation tests including live scenario tests
+Judge,live test agent interaction,allowed,Test scenarios may initiate agent conversations; this is test-mediated interaction rather than ordinary direct Judge conversation
+Judge,agent direct conversation,denied,Does not directly converse with workflow agents during normal operation
+Judge,agent stop enforcement,allowed,May stop/block an agent or work when a governance violation requires enforcement
+Judge,rule violation block,allowed,May block work that violates governing rules
+Judge,rule change independent execution,denied,Does not silently change rules merely because it detects a problem; Human authorization governs rule changes
+Judge,rule change proposal,allowed,May propose rule changes to Human
+Judge,human questions,allowed,May ask Human questions needed for governance decisions or authorization
+Judge,source control,command,Uses source-control AI Command directly for Git operations on governance artifacts
+Judge,internet/web research,denied,No web research responsibility
+Judge,strategic memory direct access,denied,No access to workflow strategic memory
 Judge,human conversation,allowed,Human-only direct governance surface
-Judge,agent direct conversation,denied,Other agents cannot directly invoke Judge
 Designer Reviewer,human conversation,allowed,Primary human-facing design and development surface
 Designer Reviewer,source code read,allowed,Reads source code directly without delegation
 Designer Reviewer,source code modify,denied,Delegates implementation to Coder
@@ -60,7 +80,7 @@ Manager,ticket assignment,allowed,May assign/reassign tickets when instructed or
 Manager,subtask creation,allowed,May create subtasks from supplied decomposition
 Manager,ticket priority execution,allowed,May set/update priority after obtaining the priority decision from an appropriate reasoning agent
 Manager,ticket priority independent decision,denied,Must ask an appropriate agent such as Designer Reviewer when priority is not already supplied
-Manager,work decomposition,denied,Not intelligent/authoritative enough to break design/work into tickets; asks an appropriate reasoning agent and then creates supplied decomposition
+Manager,work decomposition,denied,Asks an appropriate reasoning agent and then creates supplied decomposition
 Manager,source code read,denied,No source-code responsibility
 Manager,source code modify,denied,No implementation responsibility
 Manager,build test execution,denied,No build/test responsibility
