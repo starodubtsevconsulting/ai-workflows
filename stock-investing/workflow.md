@@ -14,6 +14,8 @@ The Strategist determines HOW the investing workflow approaches research and por
 
 Different investment strategies may produce substantially different flows: value, growth, quality, dividend/income, factor-based, concentrated, diversified, event-driven or custom approaches. Strategy is explicit and may be changed when evidence invalidates assumptions.
 
+Current examples include `couch-potato.md` and `value-investing.md` under `strategies/`.
+
 ## Candidate execution roles
 
 Possible ephemeral `SESSION` roles include Researcher, Company Analyst, Industry Analyst, Valuation Analyst, Risk Reviewer and Portfolio Reviewer.
@@ -23,6 +25,14 @@ Possible ephemeral `SESSION` roles include Researcher, Company Analyst, Industry
 Meaningful events may include a candidate entering the research universe, thesis creation, new financial results, valuation changes, material company/industry events, thesis invalidation, portfolio review, buy/hold/reduce/exit decisions and post-decision review.
 
 The Strategist connects these events into a concrete flow appropriate to the selected investment strategy.
+
+## Connected commands
+
+Commands are defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
+
+| Command | Reference | Used by / purpose |
+| --- | --- | --- |
+| None yet | — | Commands will be connected as the workflow is implemented. |
 
 ## Evidence and decision boundary
 
