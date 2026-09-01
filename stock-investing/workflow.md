@@ -26,6 +26,12 @@ Meaningful events may include a candidate entering the research universe, thesis
 
 The Strategist connects these events into a concrete flow appropriate to the selected investment strategy.
 
+## Prompt routing / use cases
+
+| Example prompt / intent | Route type | Route target | Result / notes |
+| --- | --- | --- | --- |
+|  |  |  |  |
+
 ## Connected commands
 
 Commands are defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
