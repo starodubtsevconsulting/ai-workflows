@@ -8,52 +8,74 @@ Compact shared context for all Software Development agents.
 | Judge | Governance/rule changes and compliance enforcement | Yes — Human only | Human; live-test scenarios only for agent testing |
 | Designer Reviewer | Design/architecture and implementation-conformance review | Yes | Human, Coder, Manager, Command Runner, `code-review` command |
 | Coder | Bounded implementation | Yes | Designer Reviewer, Command Runner / allowed commands |
-| Manager | Work/ticket coordination, estimation recording and staffing | No | Designer Reviewer, Strategist, Coder, `ticket-tracker` |
+| Manager | Work/ticket coordination, estimate validation/recording and staffing | No | Designer Reviewer, Strategist, Coder, `ticket-tracker` |
 | Command Runner | Bounded command/tool execution with caller-policy enforcement | No | Authorized callers and AI Commands |
 
 ## Prompt / intent routing
 
-Workflow-specific MCP-like routing layer. Reusable roles recognize intent; Team maps intent to concrete collaboration.
-
 | Example prompt / intent | Entry agent | Workflow flow / route | Result |
 | --- | --- | --- | --- |
 | "Review this pull request: <url>" | Designer Reviewer | Pull request review flow | Review against ticket scope |
-| "Create a task for this work" | Designer Reviewer / authorized caller | Ticket creation + estimation flow | Estimated actionable ticket |
+| "Create a task for this work" | Designer Reviewer / authorized caller | Ticket creation + estimation flow | Evidence-backed estimated ticket |
 |  |  |  |  |
 
 ### Ticket creation + estimation flow
 
-Manager owns ticket creation/recording but is intentionally not assumed to have enough reasoning capacity to independently estimate underspecified software work.
+Manager owns ticket creation and estimate acceptance/recording. It is intentionally not assumed to have enough reasoning capacity to independently decompose underspecified software work.
 
-The reasoning-capable caller should provide Manager with an **estimation packet** whenever possible:
+An estimate is a **claim that requires supporting evidence**. A bare value such as `4h` is not sufficient merely because it came from a more intelligent agent.
+
+The reasoning-capable caller provides an **estimation packet** containing enough evidence for Manager to evaluate whether the estimate is credible:
 
 - proposed scope/outcome;
-- relevant implementation/design context;
-- proposed decomposition/subtasks when useful;
-- dependencies/uncertainties/assumptions;
-- caller's best estimate (for example hours/points, according to project convention).
+- concrete decomposition into implementation pieces/subtasks/checklist items;
+- estimate per piece when useful, or enough sizing information to explain the total;
+- dependencies, uncertainty and assumptions;
+- caller's proposed total estimate according to project convention.
+
+Example:
+
+```text
+Scope: add runtime roster validation
+- [ ] load authoritative roster: ~1h
+- [ ] validate sender identity before COPY: ~1h
+- [ ] replacement/roster update path: ~1h
+- [ ] tests: ~1h
+Total proposed estimate: ~4h
+Assumptions: existing runtime registry API is available
+```
+
+This is reviewable evidence. `Implement runtime roster validation — 4h` by itself is not.
 
 Typical route:
 
-1. Designer Reviewer determines enough implementation scope to make the task actionable.
-2. Designer Reviewer decomposes the work when decomposition requires higher reasoning capacity.
-3. Designer Reviewer proposes its best estimate and sends scope + decomposition + assumptions + estimate to Manager.
-4. Manager validates that the packet is sufficiently complete/coherent for ticket creation.
-5. If estimate/context is missing or weak, Manager reports `BLOCKED` back to the caller and explicitly asks for the missing decomposition/context/best estimate rather than inventing precision.
-6. When sufficient, Manager may sanity-check/normalize the estimate using project conventions and records it through the authorized ticket-tracking path.
-7. Manager reports the created/updated ticket identifier and recorded estimate back to caller.
+1. Designer Reviewer determines actionable implementation scope.
+2. Designer Reviewer decomposes the work into reviewable pieces/checklist items.
+3. Designer Reviewer derives/proposes an estimate from that decomposition and states assumptions/uncertainty.
+4. Designer Reviewer sends the estimation packet to Manager.
+5. Manager evaluates whether the decomposition reasonably supports the proposed estimate.
+6. Manager MAY accept the estimate, challenge it, or reject it as insufficiently supported.
+7. If unsupported, Manager returns `BLOCKED` and asks the caller for decomposition/evidence or clarification. It does not record the estimate merely because the caller supplied a number.
+8. If the evidence is coherent, Manager accepts or normalizes the estimate according to project conventions and records the ticket through the authorized ticket-tracking path.
+9. Manager reports the ticket identifier and accepted estimate back to caller.
 
-Example conversation shape:
+Example rejection:
 
-`Designer Reviewer -> Manager: create task; scope=...; subtasks=...; estimate=~4h; assumptions=...`
+`Designer Reviewer -> Manager: create task "Implement X"; estimate=4h`
+
+`Manager -> Designer Reviewer: BLOCKED; estimate is unsupported. Provide decomposition/checklist and assumptions that explain the 4h estimate.`
+
+Example acceptance:
+
+`Designer Reviewer -> Manager: create task; scope=...; checklist=[...]; piece estimates=[...]; total=4h; assumptions=...`
 
 `Manager -> Designer Reviewer: COPY`
 
-`Manager -> ticket-tracker: create/update ticket with supplied scope/estimate`
+`Manager -> ticket-tracker: create/update ticket with accepted scope/decomposition/estimate`
 
-`Manager -> Designer Reviewer: DONE; ticket=<id>; estimate=4h`
+`Manager -> Designer Reviewer: DONE; ticket=<id>; accepted estimate=4h`
 
-If the caller says only `create a task` without enough estimation information, Manager does not silently manufacture a detailed estimate. It asks the reasoning-capable caller for its best estimate/decomposition first.
+The goal is not false precision. Manager validates that there is a visible reasoning trail behind the estimate and that the ticket is decomposed enough to make progress/checking possible.
 
 ### Pull request review flow
 
@@ -69,8 +91,10 @@ If the caller says only `create a task` without enough estimation information, M
 
 - Respect responsibility boundaries; do not silently absorb another agent's ownership.
 - Reusable roles know responsibility/intents; Team owns concrete peer/command orchestration.
-- Higher-reasoning callers provide Manager with decomposition/estimation context when Manager is asked to create estimated software work.
-- Manager owns recording/coordination and may challenge insufficient estimation input; it does not pretend confidence it does not have.
+- Software estimates must be evidence-backed; a bare estimate is not sufficient.
+- Reasoning-capable callers provide decomposition/checklist, assumptions and proposed estimate.
+- Manager owns estimate acceptance/recording and may reject unsupported estimates.
+- Manager does not manufacture decomposition when a more capable caller is responsible for supplying it.
 - Designer Reviewer owns design intent/conformance review; Coder owns implementation.
 - Independent code review is `code-review`, not a standing Reviewer agent.
 - Workflow Strategist owns Software Development HOW/durable domain continuity.
