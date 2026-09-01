@@ -8,65 +8,85 @@ A role is a reusable responsibility/behavior definition. A runtime agent is an i
 
 Every role definition MUST contain a Properties section with at least `level`, `human-facing`, `interaction-mode`, `memory-class`, and `lifecycle`.
 
+## Prompt / intent scenarios
+
+Every role MUST contain a prompt/intent scenario table, even when empty.
+
+For a reusable role this table describes **what kind of Human/caller intent the role recognizes**, not how a particular workflow implements the multi-agent solution.
+
+| Example prompt / intent | Role interpretation | Workflow routing required |
+| --- | --- | --- |
+|  |  |  |
+
+A role MUST NOT hard-code knowledge of workflow-specific peers, commands, ticket systems, repositories or orchestration merely to explain how an intent is fulfilled.
+
+For example, a reusable Designer Reviewer may recognize:
+
+`"Review this pull request: <url>" -> review an implementation/change against its intended scope -> yes`
+
+The reusable role does **not** say "call Manager, then ticket-tracker, then code-review" because those are workflow/team implementation details.
+
+When `Workflow routing required = yes`, the runtime agent MUST consult the active workflow/team prompt-routing definition to determine the allowed flow, roles and commands for that workflow.
+
+This preserves:
+
+`Role = understands responsibility/intent`
+
+`Workflow Team = knows who/how to collaborate`
+
+`Command = knows how to perform bounded operation`
+
 ## Agent communication protocol
 
-Every runtime agent implementing a role MUST follow the common [`_common/communication.md`](_common/communication.md) protocol for agent-to-agent communication.
-
-In particular:
-
-- every outgoing agent message identifies sender `agent_id`, `agent_name`, `profile`, `workflow`, and `project` when applicable, plus contextual identifiers such as branch/task/session when relevant;
-- delegated work is accepted with `COPY` only after the receiver understands and accepts responsibility;
-- `COPY` creates an obligation to report back;
-- the receiver reports `DONE`, `BLOCKED`, `REFUSED`, `FAILED`, or a material `UPDATE` as appropriate;
-- after `COPY`, the delegator may rely on report-back rather than continuously polling/watching the receiver;
-- communication never broadens authority.
-
-This is a runtime behavior requirement inherited by every role implementation, not something each reusable role should redefine independently.
+Every runtime agent implementing a role MUST follow [`_common/communication.md`](_common/communication.md).
 
 ## Command authority — not granted by default
 
-Concrete commands are not granted at the reusable role level. This is a default, not permanent prohibition. A workflow implementation may explicitly grant commands to an agent realizing the role.
+Concrete commands are not granted at reusable role level. Workflow implementation explicitly grants them.
 
-`Role (no command grants) -> Workflow agent realization -> command-matrix explicit grant -> Runtime/profile authorization -> Command execution`
+`Role -> Workflow agent realization -> command-matrix grant -> Runtime authorization -> Command`
 
-Omission means not granted; explicit `forbidden` means intentional no-go. Every implementation evaluates effective command policy before direct or Command Runner invocation.
+Omission means not granted; explicit `forbidden` means intentional no-go.
 
 ## Human participant
 
-Every workflow starts from or ultimately serves a Human participant. Human is not an AI agent but MUST be represented in workflow team communication/capability modeling when human interaction exists.
+Every workflow starts from or ultimately serves Human. Human is not an AI agent but MUST be represented in workflow team communication/capability modeling when human interaction exists.
 
-`Human -> human-facing Agent(s) -> non-human-facing Agents / Commands / Flows`
-
-Human remains final authority over goals subject to runtime safety/authorization boundaries.
+`Human -> human-facing Agent(s) -> internal Agents / Commands / Flows`
 
 ## Human-facing semantics
 
-`human-facing` is a default characteristic, not immutable permission. A workflow/profile may explicitly override it.
+`human-facing` is a default characteristic and may be explicitly overridden by workflow/profile.
+
+Human-facing roles SHOULD have representative Human prompt scenarios sufficient to show their expected conversational surface without embedding workflow orchestration.
 
 ## Interaction mode
 
-- `reactive` — acts when invoked/routed by human, role, flow, event or schedule.
+- `reactive` — acts when invoked/routed by Human, role, flow, event or schedule.
 - `proactive` — may initiate work/communication when mandate/runtime allow it.
 - `mixed` — supports both.
 
-Interaction mode does not grant command/tool/autonomy permission.
+Interaction mode does not grant authority.
 
 ## Override rule
 
-Reusable role properties are defaults. Workflow/profile specialization may override them explicitly but SHOULD NOT silently broaden authority, privacy access, command permissions or memory scope.
-
-`Role defaults + Workflow specialization + Profile/runtime policy -> Agent profile/instance`
+Reusable role properties are defaults. Workflow/profile specialization may override explicitly but SHOULD NOT silently broaden authority, privacy access, command permissions or memory scope.
 
 ## Required role sections
 
-Every role SHOULD define purpose/responsibility, properties, responsibilities, boundaries, memory/lifecycle behavior, Human interaction expectations, relationships to other roles where relevant, and conceptual command/tool needs where relevant. Concrete command grants belong to workflow `team/command-matrix.csv`.
+Every role SHOULD define purpose/responsibility, properties, prompt/intent scenarios, responsibilities, boundaries, memory/lifecycle behavior, Human interaction expectations and conceptual command/tool needs where relevant.
+
+Workflow-specific peer relationships and orchestration belong to the workflow/team definition, not reusable role prose.
 
 ## Acceptance checklist
 
 - [ ] Purpose/responsibility is defined.
 - [ ] Required Properties are declared.
-- [ ] boundaries and human interaction expectations are defined.
-- [ ] role implementation inherits the common communication protocol.
-- [ ] role itself grants no concrete commands.
-- [ ] unlisted commands remain not granted unless workflow policy grants them.
-- [ ] workflows represent Human routing where applicable.
+- [ ] Prompt/intent scenario table exists even when empty.
+- [ ] Human-facing role has representative Human prompt scenarios.
+- [ ] Role prompt scenarios describe intent, not workflow-specific orchestration.
+- [ ] Workflow-routing-required scenarios direct implementation to active workflow/team routing.
+- [ ] Boundaries and Human interaction expectations are defined.
+- [ ] Role implementation inherits common communication protocol.
+- [ ] Role itself grants no concrete commands.
+- [ ] Workflow represents Human/team routing where applicable.
