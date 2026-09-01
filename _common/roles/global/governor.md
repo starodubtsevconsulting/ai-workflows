@@ -14,6 +14,13 @@ Persistent across sessions and workflows. It requires the broadest and most flex
 
 Each reasoning session retrieves or compiles the subset needed for the current decision.
 
+Memory is a capability requirement, not a commitment to one implementation. Known implementations worth evaluating include:
+
+- [Mem0](https://mem0.ai/) — persistent memory infrastructure for agents and applications, with extraction/compression and retrieval across sessions.
+- [MemPalace](https://github.com/MemPalace/mempalace) — local-first open-source memory that keeps source conversations/files verbatim and retrieves them through structured semantic search; useful as a contrasting design where the original reasoning is retained rather than only extracted memories.
+
+The Governor should remain independent of either implementation. A memory adapter may use one of these, another system, or a combination as long as the required durability, scope, provenance, retrieval, privacy, and growth characteristics are preserved.
+
 ## Human model
 
 Unlike workflow-level roles, the Global Governor explicitly takes the human into account as both ultimate authority and a powerful but constrained resource. Relevant inputs may include workload, fatigue/energy when available, attention, context switching, recurring biases, avoidance, novelty seeking, strengths, commitments, preferences, and previous decisions/outcomes.
