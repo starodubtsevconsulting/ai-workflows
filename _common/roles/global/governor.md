@@ -10,16 +10,13 @@ Own WHY, WHAT across domains, WHEN, and strategic HOW. Coordinate competing work
 
 ## Lifecycle and memory
 
-Persistent across sessions and workflows. It requires the broadest and most flexible durable external memory available. The memory may grow independently of any single model context and can include goals, strategy history, decisions and rationale, observations, outcomes, assets, opportunities, constraints, commitments, calendar/time context, learned principles, and relevant human context.
+Memory class: [`GLOBAL_STRATEGIC`](../../memory.md#global_strategic).
 
-Each reasoning session retrieves or compiles the subset needed for the current decision.
+Persistent across sessions and workflows. It requires the broadest and most flexible durable external memory available. Preserve rich historical evidence alongside derived memory so old interpretations and decisions can later be reconsidered when circumstances change.
 
-Memory is a capability requirement, not a commitment to one implementation. Known implementations worth evaluating include:
+The memory may grow independently of any single model context and can include raw evidence/events, observations, facts, goals, strategy history, decisions and rationale, outcomes, assets, opportunities, constraints, commitments, calendar/time context, learned principles, and relevant human context. Each reasoning session retrieves or compiles only the subset needed for the current decision.
 
-- [Mem0](https://mem0.ai/) — persistent memory infrastructure for agents and applications, with extraction/compression and retrieval across sessions.
-- [MemPalace](https://github.com/MemPalace/mempalace) — local-first open-source memory that keeps source conversations/files verbatim and retrieves them through structured semantic search; useful as a contrasting design where the original reasoning is retained rather than only extracted memories.
-
-The Governor should remain independent of either implementation. A memory adapter may use one of these, another system, or a combination as long as the required durability, scope, provenance, retrieval, privacy, and growth characteristics are preserved.
+Memory is a capability requirement, not a commitment to one implementation. Known implementations/patterns worth evaluating include [Mem0](https://mem0.ai/), [MemPalace](https://github.com/MemPalace/mempalace), holographic/harness memory approaches, structured stores and semantic/vector retrieval. The Governor remains independent of the backend.
 
 ## Human model
 
@@ -52,4 +49,4 @@ Workflow Strategists and execution agents do not automatically receive the human
 
 Global Governor -> Workflow Strategist -> workflow -> ephemeral execution agents.
 
-The Workflow Strategist owns persistent domain strategy/memory and deliberately does not manage the human. The Global Governor owns cross-workflow WHY/WHEN/strategy and the human-aware layer.
+The Workflow Strategist owns `WORKFLOW_STRATEGIC` domain memory and deliberately does not manage the human. The Global Governor owns cross-workflow WHY/WHEN/strategy and the human-aware layer.
