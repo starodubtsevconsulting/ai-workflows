@@ -33,6 +33,12 @@ Meaningful events may include note captured, source attached, note classified, c
 
 The selected strategy determines how these events connect. For example, Zettelkasten emphasizes atomic notes and links, PARA emphasizes actionability/context, and a custom capture strategy may prioritize frictionless intake before later processing.
 
+## Prompt routing / use cases
+
+| Example prompt / intent | Route type | Route target | Result / notes |
+| --- | --- | --- | --- |
+|  |  |  |  |
+
 ## Connected commands
 
 Commands are defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
