@@ -37,6 +37,14 @@ The workflow connects work through events and a concrete flow, but does not pres
 
 For example, an outline-first strategy may make outline validation an early gate, while discovery writing may intentionally draft before detailed structure and introduce stronger continuity/restructure loops later.
 
+## Connected commands
+
+Commands are defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
+
+| Command | Reference | Used by / purpose |
+| --- | --- | --- |
+| None yet | — | Commands will be connected as the workflow is implemented. |
+
 ## Memory boundary
 
 Book/project memory belongs to the workflow, not individual Writer or Editor agents. See [`_common/memory.md`](../_common/memory.md). Raw manuscript/source files remain authoritative artifacts and are not replaced by extracted memory summaries.
