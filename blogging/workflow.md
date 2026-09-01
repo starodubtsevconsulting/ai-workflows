@@ -33,6 +33,12 @@ A typical flow may resemble:
 
 This is illustrative rather than mandatory. Strategy determines the actual flow.
 
+## Prompt routing / use cases
+
+| Example prompt / intent | Route type | Route target | Result / notes |
+| --- | --- | --- | --- |
+|  |  |  |  |
+
 ## Connected commands
 
 Commands are defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
