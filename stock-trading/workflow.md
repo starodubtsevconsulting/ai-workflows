@@ -24,6 +24,12 @@ Meaningful events may include market/session open, candidate signal, setup quali
 
 The Strategist connects events into the concrete flow required by the selected strategy while preserving hard risk/authorization boundaries.
 
+## Prompt routing / use cases
+
+| Example prompt / intent | Route type | Route target | Result / notes |
+| --- | --- | --- | --- |
+|  |  |  |  |
+
 ## Connected commands
 
 Commands are defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
