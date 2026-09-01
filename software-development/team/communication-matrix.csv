@@ -1,0 +1,19 @@
+from_agent,to_agent,allowed,purpose
+Strategist,Designer Reviewer,true,Delegate or discuss design work
+Strategist,Coder,true,Delegate bounded implementation when design context is sufficient
+Strategist,Manager,true,Request work or ticket coordination
+Designer Reviewer,Coder,true,Communicate design intent and request implementation corrections
+Designer Reviewer,Reviewer,true,Coordinate independent review evidence
+Coder,Designer Reviewer,true,Clarify design and return implementation for conformance review
+Coder,Reviewer,true,Submit implementation for independent review
+Coder,Command Runner,true,Request authorized bounded operations
+Reviewer,Coder,true,Return implementation findings
+Reviewer,Designer Reviewer,true,Raise design-related findings
+Manager,Strategist,true,Return coordination status or escalate prioritization
+Manager,Coder,true,Route bounded implementation work
+Manager,Designer Reviewer,true,Route design-related work
+Command Runner,Strategist,true,Return bounded execution result
+Command Runner,Designer Reviewer,true,Return bounded execution result
+Command Runner,Coder,true,Return bounded execution result
+Command Runner,Reviewer,true,Return bounded execution result
+Command Runner,Manager,true,Return bounded execution result
