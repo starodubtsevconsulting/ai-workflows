@@ -34,6 +34,14 @@ Conceptually:
 
 `opportunity/events + sales strategy -> adaptive flow -> execution roles -> market evidence -> strategy/memory update`
 
+## Connected commands
+
+Commands are defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
+
+| Command | Reference | Used by / purpose |
+| --- | --- | --- |
+| None yet | — | Commands will be connected as the workflow is implemented. |
+
 ## Memory boundary
 
 Sales-domain lessons and relationship/process context belong to workflow memory. Execution agents do not acquire permanent personal memory. Sensitive/private data remains subject to the profile/runtime privacy boundary and should not be published as part of a reusable workflow definition.
