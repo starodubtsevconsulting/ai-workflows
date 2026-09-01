@@ -33,6 +33,14 @@ Meaningful events may include note captured, source attached, note classified, c
 
 The selected strategy determines how these events connect. For example, Zettelkasten emphasizes atomic notes and links, PARA emphasizes actionability/context, and a custom capture strategy may prioritize frictionless intake before later processing.
 
+## Connected commands
+
+Commands are defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
+
+| Command | Reference | Used by / purpose |
+| --- | --- | --- |
+| None yet | — | Commands will be connected as the workflow is implemented. |
+
 ## Artifact versus AI memory
 
 This distinction is mandatory:
