@@ -8,6 +8,8 @@ A workflow represents a reusable human or business activity. It is not an agent,
 
 Conceptually:
 
+`Prompt/Event -> Workflow routing -> Role/Agent or Command -> Flow -> Outcomes/Evidence`
+
 `Workflow + Roles + Strategy + Memory + Events + Commands -> adaptive Flow -> runtime Agents -> Outcomes/Evidence`
 
 A Workflow Strategist owns domain continuity and determines/adapts strategy and flow. The Global Governor sits above workflows and owns cross-workflow WHY/WHEN, allocation and human-aware strategy.
@@ -87,9 +89,49 @@ Conceptually:
 
 `event -> state/decision -> role/action/command -> result event`
 
+### Prompt routing / use cases
+
+Every `workflow.md` MUST contain a **Prompt routing / use cases** table. This is the human-language routing contract: examples of what a person might ask and how the workflow interprets/routes that intent.
+
+It is intentionally similar in spirit to an MCP/tool routing description, but represented as readable Markdown and owned by the workflow.
+
+A prompt MAY route:
+
+1. directly to a connected AI Command;
+2. to a role/agent, which may then select/invoke one or more commands it is authorized to use;
+3. to the Workflow Strategist when strategy, ambiguity, sequencing or cross-step reasoning is required;
+4. into a workflow flow/event rather than a single command.
+
+Required table shape:
+
+| Example prompt / intent | Route type | Route target | Result / notes |
+| --- | --- | --- | --- |
+| `<natural-language example>` | `command` / `role` / `strategist` / `flow` | command ID, role name, or flow/event | expected interpretation |
+
+The table SHOULD contain several natural-language variants where useful. These are examples/semantic mappings, not exact phrases that users must type.
+
+Example for Software Development:
+
+| Example prompt / intent | Route type | Route target | Result / notes |
+| --- | --- | --- | --- |
+| “Push these changes.” | command | `source-control` | Direct bounded source-control operation when context/authorization is sufficient. |
+| “Check the new ticket.” | role | `Manager` | Manager interprets the ticket-management task and may invoke the connected ticket-tracker command. |
+| “Let's code this.” | flow | implementation flow | Route into the development flow; the Strategist/appropriate role determines the required design, coding and review steps. |
+| “What should we build first?” | strategist | `Workflow Strategist` | Requires prioritization/strategy rather than a direct command. |
+
+A role route is deliberately different from a command route. The role owns reasoning/responsibility and may use commands as bounded capabilities. For example:
+
+`prompt -> Manager agent -> ticket-tracker command -> result -> Manager interpretation`
+
+versus:
+
+`prompt -> source-control command -> bounded result`
+
+If a workflow has no implemented mappings yet, the section/table is still REQUIRED with a `TBD` row.
+
 ### Connected commands
 
-Every `workflow.md` MUST contain a **Connected commands** table listing commands that the workflow can call directly.
+Every `workflow.md` MUST contain a **Connected commands** table listing commands that the workflow can call directly or make available to its authorized roles.
 
 Commands are reusable bounded actions defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands). A workflow references a command rather than duplicating its specification or implementation.
 
@@ -103,8 +145,7 @@ When commands are connected:
 
 - use the canonical command identifier/path from `ai-commands`;
 - link to the command definition in the AI Commands repository;
-- describe why/where the workflow may invoke it;
-- list only commands callable directly by this workflow;
+- describe why/where the workflow or role may invoke it;
 - do not duplicate the command's internal specification;
 - runtime/profile configuration may further restrict command availability and authorization;
 - declaring a command does not grant credentials or bypass runtime safety/permission boundaries.
@@ -113,7 +154,9 @@ The section and table are REQUIRED even when the workflow currently has no conne
 
 **Command** = bounded reusable action.
 
-**Workflow** = continuing activity that composes roles, strategy, memory, events, flow and connected commands.
+**Role/Agent** = responsibility/reasoning boundary that may use commands.
+
+**Workflow** = continuing activity that composes roles, strategy, memory, events, routing, flow and connected commands.
 
 ### Memory
 The workflow MUST declare its memory semantics using [`_common/memory.md`](_common/memory.md).
@@ -179,6 +222,7 @@ A new workflow is structurally complete when:
 - [ ] roles/composition are defined;
 - [ ] strategy semantics are defined;
 - [ ] events and adaptive flow semantics are defined;
+- [ ] Prompt routing / use cases table exists;
 - [ ] Connected commands table exists and references `ai-commands`;
 - [ ] memory class/boundary is defined;
 - [ ] inputs/outputs/evidence are defined;
