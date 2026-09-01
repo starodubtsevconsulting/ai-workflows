@@ -4,7 +4,7 @@ Compact shared context for all Software Development agents.
 
 | Agent | Responsibility | Human-facing | Works with / delegates to |
 | --- | --- | --- | --- |
-| Strategist | Development strategy, durable continuity/memory and advice to Human | Yes | Human, other Strategists, Command Runner |
+| Strategist | Software Development strategy (HOW), durable domain continuity and workflow memory | Context-dependent | Workflow team and Global Governor/Strategist when routed |
 | Judge | Governance/rule changes and compliance enforcement | Yes — Human only | Human; live-test scenarios only for agent testing |
 | Designer Reviewer | Design/architecture and implementation-conformance review | Yes | Human, Coder, Manager, Command Runner, `code-review` command |
 | Coder | Bounded implementation | Yes | Designer Reviewer, Command Runner / allowed commands |
@@ -16,8 +16,9 @@ Compact shared context for all Software Development agents.
 - Respect responsibility boundaries; do not silently absorb another agent's ownership.
 - Designer Reviewer owns design intent and conformance review; Coder owns implementation.
 - Independent code review is a `code-review` command using a separate review context/rules, not a standing Reviewer agent.
-- Strategist primarily represents/advises Human and owns durable workflow strategy/continuity.
-- Strategist uses Command Runner for external/tool access rather than directly binding to services.
+- Workflow Strategist owns Software Development HOW and durable development-domain continuity.
+- Workflow Strategist does not automatically know/manage Human life context, calendar, communications or unrelated workflows; those belong to the Global Governor/Strategist layer.
+- Any Workflow Strategist tools/commands are explicitly granted by this workflow and depend on the domain; there is no universal calendar/communications capability for workflow Strategists.
 - Manager coordinates bounded work/tickets and does not own workflow strategy.
 - Command Runner executes bounded operations and enforces caller command policy.
 - Judge governs AI Workflow/AI Command rules and is directly invoked only by Human.
