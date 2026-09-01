@@ -18,68 +18,51 @@ The Command Runner should normally use a low-cost/low-intelligence model suffici
 
 ## Intent-to-command routing
 
-Callers do not need to know or name exact AI Commands. They may ask in natural/task language, for example "push this", "persist these changes", "show me why the service failed", or "run the build".
+Callers may ask in natural/task language rather than naming commands. Command Runner maintains prompt/use-case mappings from representative intent to connected AI Commands.
 
-Command Runner MUST support a prompt/use-case routing table that maps representative intents to commands. Concrete workflow/team configuration may extend these mappings as commands are connected.
-
-Conceptual table:
-
-| Example intent | Command | Notes |
-| --- | --- | --- |
-| "push this" / "persist these changes" | `source-control` | Resolve appropriate Git operation/context. |
-| "show me the logs" / "why did the service fail?" | `logs` | Retrieve bounded diagnostics rather than dumping raw logs. |
-
-Routing is semantic, not exact-phrase matching.
-
-If the command or required execution context cannot be determined safely (for example repository/branch is ambiguous), Command Runner MUST report `BLOCKED` back to the caller with the missing information rather than guessing.
+If command or required execution context cannot be determined safely (for example repository/branch is ambiguous), report `BLOCKED` with missing information rather than guessing.
 
 ## Authorization
 
-Before execution Command Runner verifies:
-
-1. caller identity/context under the common communication protocol;
-2. caller -> Command Runner communication permission;
-3. caller's permission for the resolved command;
-4. command/runtime authorization.
-
-Command Runner cannot lend its own broader command capability to the caller.
+Before execution Command Runner verifies caller identity/context, caller -> Runner communication permission, caller permission for the resolved command, and command/runtime authorization. It cannot lend broader capability to the caller.
 
 ## Command composition
 
-Command Runner routes to the selected top-level AI Command. It does not invent arbitrary command chains itself.
-
-If the selected AI Command delegates to another AI Command, that composition is governed by the calling command's own explicit Command delegation policy.
+Command Runner selects a top-level command; it does not invent arbitrary chains. Nested command delegation follows the selected command's explicit delegation policy.
 
 ## Retry behavior
 
-Command Runner MAY retry transient failures when retrying is reasonably safe, for example timeouts or temporary transport/service failures.
-
-Default guidance: up to **3 attempts total** when the failure appears transient and the operation is safe/idempotent or the command explicitly supports safe retry.
-
-It MUST NOT blindly retry destructive/non-idempotent operations when duplicate execution could create unintended effects. In that case it reports failure/blocking context to the caller.
+May retry transient failures when reasonably safe. Default guidance: up to 3 attempts total for transient failures when operation is safe/idempotent or explicitly supports safe retry. Do not blindly retry destructive/non-idempotent operations.
 
 ## Output protection
 
 Protecting reasoning agents from excessive operational output is a primary responsibility.
 
-Command Runner SHOULD:
+Command Runner SHOULD filter/query at source, enforce output bounds, summarize carefully, preserve essential status/error/provenance, and return the smallest evidence sufficient for the caller's next decision.
 
-- enforce output/line/token bounds;
-- filter/query at the source where possible;
-- return the smallest evidence sufficient for the caller's next decision;
-- summarize large results carefully and accurately;
-- preserve important error/status/provenance details;
-- avoid forwarding huge raw logs, diffs or command output merely because they are available.
+## Selective raw-output preservation
 
-The report-back summary should be concise but useful. The purpose is not to hide evidence, but to prevent wasteful context consumption while preserving the information required for reasoning.
+Raw output MAY be preserved when doing so has practical diagnostic/operational value, but it is not required for every command.
 
-Raw-result persistence/storage policy is intentionally **TBD** and should not be assumed until explicitly specified.
+Examples where preservation may make sense:
+
+- `logs` — preserve/reference the retrieved log slice or diagnostic artifact when useful for later inspection;
+- server/process launch or long-running execution — preserve/reference execution logs when they may be needed for diagnosis;
+- test/build operations — preserve/reference detailed output/artifacts when useful beyond the compact report.
+
+Examples where separate preservation is normally unnecessary:
+
+- `source-control` commit/push/branch operations — Git already provides durable authoritative history/state;
+- commands whose authoritative result already lives in the underlying system;
+- small results already captured adequately in agent communication/report-back history.
+
+Prefer referencing the authoritative underlying source rather than duplicating large data unnecessarily. Agent communication logs may provide sufficient audit/history for many command interactions.
+
+Whether to preserve raw output is therefore a command/result-specific decision based on usefulness, size, existing authoritative storage and future diagnostic value.
 
 ## Communication
 
-Command Runner follows [`../communication.md`](../communication.md), including receiver-side authorization and `COPY -> REPORT BACK` semantics.
-
-Typical terminal states are `DONE`, `BLOCKED`, `FAILED`, or `REFUSED`.
+Follows [`../communication.md`](../communication.md), including receiver-side authorization and `COPY -> REPORT BACK`. Typical terminal states: `DONE`, `BLOCKED`, `FAILED`, `REFUSED`.
 
 ## Boundaries
 
