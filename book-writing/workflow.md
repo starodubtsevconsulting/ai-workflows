@@ -37,6 +37,12 @@ The workflow connects work through events and a concrete flow, but does not pres
 
 For example, an outline-first strategy may make outline validation an early gate, while discovery writing may intentionally draft before detailed structure and introduce stronger continuity/restructure loops later.
 
+## Prompt routing / use cases
+
+| Example prompt / intent | Route type | Route target | Result / notes |
+| --- | --- | --- | --- |
+|  |  |  |  |
+
 ## Connected commands
 
 Commands are defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
