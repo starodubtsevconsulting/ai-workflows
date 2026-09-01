@@ -10,50 +10,62 @@ Every workflow MUST expose the same required skeleton even when parts are not po
 
 A workflow represents a reusable human/business activity. A flow is a bounded process inside it.
 
-`Role definition -> agents.md realization -> Team policy -> runtime roster -> command/runtime authorization`
+A workflow may operate over **multiple sources**. A source is a concrete subject/context to which the reusable workflow is applied, such as a software project/repository, company, property, client/account, media project or another domain-specific unit.
+
+Examples:
+
+`Software Development workflow -> Project A, Project B, Project C`
+
+`Accounting workflow -> Company A, Company B, Company C`
+
+The workflow owns reusable process/team/role policy. The source owns source-specific context, configuration, artifacts and conventions.
+
+`Role definition -> agents.md realization -> Team policy -> Source context -> runtime roster -> command/runtime authorization`
+
+## Sources / projects
+
+Every workflow MUST define how its sources are identified/resolved, even if only one source currently exists.
+
+A source SHOULD expose a stable identifier and the workflow-specific locations/configuration needed by agents. Agents MUST NOT assume that source-specific paths, repositories, credentials, test locations or conventions are globally shared across all sources.
+
+For software development, a source will commonly be a **project**. Each project may define, for example:
+
+- repository/workspace location;
+- source-control context;
+- ticket/project mapping;
+- build/test commands or command configuration;
+- product/runtime startup context;
+- end-to-end/acceptance-test location;
+- project-specific adapters/helpers/fixtures;
+- other project conventions needed by the workflow.
+
+A workflow-level role may therefore operate across many projects while resolving project-specific assets from the active source context.
 
 ## Team model: policy versus runtime roster
 
 Every workflow owns a **Team** definition under `team/`. Team is the static, version-controlled collaboration/security contract for that workflow.
 
-Team defines:
+Team defines roles/agent realizations, capabilities, role-to-role communication, command access, prompt/intent routing, multi-agent flows and workflow-specific staffing/lifecycle authority.
 
-- which roles/agent realizations participate;
-- responsibilities/capabilities;
-- which role-to-role communication routes are allowed;
-- which commands each agent realization may use;
-- prompt/intent routing and multi-agent flows;
-- workflow-specific staffing/lifecycle authority.
+Team does not store current runtime agent IDs. Runtime maintains an authoritative roster binding team slots/role instances to current IDs/state.
 
-Team does **not** store current runtime agent IDs in version-controlled matrices.
+`team policy (static) + source context + runtime roster (dynamic) = effective workflow execution context`
 
-The runtime maintains a separate **authoritative runtime roster** binding team slots/role instances to current `agent_id` values and active/inactive state. This roster changes when Admin/Manager/runtime performs staffing.
-
-`team policy (static) + runtime roster (dynamic) = effective team identity/communication trust`
-
-All agents inherit the common roster-validation and communication protocol from [`_common/communication.md`](_common/communication.md) through [`role.spec.md`](role.spec.md). Workflow files MUST NOT repeat those common rules for each agent.
+All agents inherit common roster-validation/communication from `_common/communication.md` through `role.spec.md`; workflow files do not repeat it per agent.
 
 ## Agent lifecycle: minimal active roster
 
 Keep active population as small as practical. Create/activate only when needed; retire/archive bounded workers when responsibility ends; avoid unnecessary duplicates; allow temporary safe handoff overlap; prefer recoverable archival/deactivation over destructive deletion.
 
-Multiple instances of one reusable role are allowed when workflow need justifies them, for example `Coder 1` and `Coder 2`. Each is a separate runtime roster entry/ID under the same role policy unless explicitly specialized.
+Multiple instances of one role are allowed when justified, for example `Coder 1` and `Coder 2`, each with separate runtime identity.
 
 ## Staffing authorities
 
-A workflow explicitly declares which agent realizations may change runtime team membership.
-
-Admin, when present, is a Human-facing operational lifecycle/recovery authority for its workflow.
-
-Manager MAY also receive normal staffing authority where the workflow requires work-capacity management, such as adding/replacing/retiring Coders.
-
-Every authorized staffing operation MUST follow the common runtime-roster update protocol. Staffing is incomplete until the authoritative roster/trust state is updated and the team can observe it.
+Workflow explicitly declares which agents may change runtime membership. Admin may provide lifecycle/recovery authority; Manager may receive normal staffing authority. Every staffing change updates authoritative runtime roster/trust state.
 
 ## Optional Admin
 
-A workflow MAY define Admin. Admin is not mandatory. When present, it is Human-facing and provides workflow operational lifecycle/recovery authority. Governance/rule changes remain Human -> Judge.
-
-If Admin itself is replaced, use successor-first handoff: create/verify successor, update trust/roster, then archive predecessor. Failed verification leaves predecessor active.
+Workflow MAY define Admin. When present, it is Human-facing workflow lifecycle/recovery authority. Governance/rule changes remain Human -> Judge. Admin replacement uses successor-first verified handoff.
 
 ## Required folder structure
 
@@ -67,17 +79,21 @@ Defines workflow-local agent realizations/provider-independent runtime hints.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  |  |  |  |  |  |  |  |  |  |  |
 
-Every workflow SHOULD explicitly define Admin or state it is absent.
-
 ## team/
 
-Required shared static coordination/authority contract. Commands and communication are not granted by default. Missing grants mean not allowed; explicit forbidden entries document intentional no-go boundaries.
-
-Runtime IDs do not belong in these static matrices.
+Required shared static coordination/authority contract. Missing communication/command grants mean not allowed. Runtime IDs do not belong in static matrices.
 
 ## workflow.md
 
-Required authoritative workflow contract with purpose/boundary, strategic layer, roles/composition, strategies, flows/events, prompt routing/use cases, connected commands, memory, inputs/outputs/evidence, runtime and privacy boundaries.
+Required authoritative workflow contract with purpose/boundary, sources/projects, strategic layer, roles/composition, strategies, flows/events, prompt routing/use cases, connected commands, memory, inputs/outputs/evidence, runtime and privacy boundaries.
+
+### Sources / projects
+
+Every concrete workflow keeps this section even if currently empty/single-source.
+
+| Source type | Identifier / resolution | Source-specific configuration / artifacts | Notes |
+| --- | --- | --- | --- |
+|  |  |  |  |
 
 ### Prompt routing / use cases
 
@@ -91,7 +107,11 @@ Required even when empty; references reusable AI Commands.
 
 ## Concepts
 
-**Workflow** = long-lived domain/activity.
+**Workflow** = long-lived reusable domain/activity.
+
+**Source** = concrete subject/context the workflow operates on.
+
+**Project** = common Software Development source type.
 
 **Role** = reusable responsibility definition.
 
@@ -99,7 +119,7 @@ Required even when empty; references reusable AI Commands.
 
 **Team** = static workflow-specific collaboration/security policy.
 
-**Runtime roster** = dynamic authoritative mapping of team instances to current runtime IDs/state.
+**Runtime roster** = dynamic mapping of team instances to current runtime IDs/state.
 
 **Flow** = bounded process inside workflow.
 
@@ -107,24 +127,23 @@ Required even when empty; references reusable AI Commands.
 
 ## Memory
 
-Workflows declare memory semantics using `_common/memory.md`. Strategic roles may own persistent memory; execution roles normally use session context unless explicitly specified.
+Workflows declare memory semantics using `_common/memory.md`. Persistent knowledge that is source-specific SHOULD preserve source identity/scope so context from different projects/companies is not silently mixed.
 
 ## Runtime boundary
 
-Workflow definitions remain provider independent. Runtime/profile maps abstract requirements to concrete models, IDs/roster, schedules/triggers, commands, credentials/integrations and final authorization.
+Workflow definitions remain provider independent. Runtime/profile resolves active source/project and maps abstract requirements to concrete models, IDs/roster, paths, schedules/triggers, commands, credentials/integrations and final authorization.
 
 ## Minimum acceptance checklist
 
 - [ ] required skeleton exists even when empty;
-- [ ] static Team policy is defined separately from dynamic runtime roster;
-- [ ] common communication/trust rules are inherited rather than duplicated;
-- [ ] workflow explicitly defines Admin or states Admin absent;
-- [ ] staffing authorities are explicit;
-- [ ] staffing changes update authoritative runtime roster;
-- [ ] multiple role instances can be represented safely when needed;
-- [ ] active roster follows minimum-necessary principle;
-- [ ] every defined agent declares scheduled yes/no and schedule intent;
+- [ ] source/project concept and resolution are defined;
+- [ ] source-specific context is not silently shared across sources;
+- [ ] static Team policy is separate from dynamic runtime roster;
+- [ ] common communication/trust rules are inherited;
+- [ ] Admin is explicitly defined or absent;
+- [ ] staffing authorities are explicit and update roster;
+- [ ] every agent declares scheduled yes/no and schedule intent;
 - [ ] team matrices exist;
-- [ ] command/communication access is not granted unless explicit;
+- [ ] command/communication access requires explicit grant;
 - [ ] prompt routing/use cases and connected commands exist;
 - [ ] memory/runtime/privacy boundaries are represented.
