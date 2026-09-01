@@ -33,6 +33,14 @@ A typical flow may resemble:
 
 This is illustrative rather than mandatory. Strategy determines the actual flow.
 
+## Connected commands
+
+Commands are defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
+
+| Command | Reference | Used by / purpose |
+| --- | --- | --- |
+| None yet | — | Commands will be connected as the workflow is implemented. |
+
 ## Memory boundary
 
 Published articles and source materials remain authoritative artifacts. Workflow memory should make prior work easy to retrieve and reason about without replacing the originals. Execution agents have no permanent personal memory; durable editorial lessons flow back to the Strategist.
