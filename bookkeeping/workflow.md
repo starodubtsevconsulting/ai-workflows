@@ -50,6 +50,14 @@ The bookkeeping workflow may watch/index these folders, classify newly added doc
 
 The Workflow Strategist's `WORKFLOW_STRATEGIC` memory stores durable bookkeeping decisions, classification rules, learned exceptions and outcomes rather than duplicating the complete document archive into conversational memory.
 
+## Connected commands
+
+Commands are defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
+
+| Command | Reference | Used by / purpose |
+| --- | --- | --- |
+| None yet | — | Commands will be connected as the workflow is implemented. |
+
 ## Boundary with accounting
 
 Bookkeeping focuses on operational financial records: invoices, receipts, categorization, reconciliation, source-document organization and completeness. Higher-level accounting interpretation, financial statements, tax treatment, compliance and analysis may be represented by separate workflows that consume bookkeeping outputs.
