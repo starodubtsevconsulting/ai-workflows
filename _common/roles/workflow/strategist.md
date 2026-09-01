@@ -10,9 +10,11 @@ Keep one workflow strategically coherent over time: WHAT should be achieved insi
 
 ## Lifecycle and memory
 
-Persistent across workflow sessions. Durable workflow-scoped memory survives model/session recreation and contains facts, decisions, rationale, outcomes, standards, observations, failures, and learned principles.
+Memory class: [`WORKFLOW_STRATEGIC`](../../memory.md#workflow_strategic).
 
-The Strategist retrieves/compiles only relevant memory projections for a session or execution agent. Designer, Coder, Reviewer, Command Runner, and similar execution agents are ephemeral by default.
+Persistent across workflow sessions. Durable workflow-scoped memory survives model/session recreation and contains facts, decisions, rationale, outcomes, standards, observations, failures, and learned principles. It should be compact and distilled enough for inexpensive retrieval rather than preserving unlimited conversational history.
+
+The Strategist retrieves/compiles only relevant memory projections for a session or execution agent. Designer, Coder, Reviewer, Command Runner, and similar execution agents use `SESSION` memory and are ephemeral by default.
 
 ## Human boundary
 
@@ -30,4 +32,4 @@ The Workflow Strategist does NOT model, manage, optimize, or reshape the human. 
 
 ## Relationship to Global Governor
 
-The Global Governor owns WHY, WHEN, cross-workflow allocation, broad human-aware strategy, and the broadest memory. This role owns only the strategy and memory of its workflow.
+The Global Governor owns WHY, WHEN, cross-workflow allocation, broad human-aware strategy, and `GLOBAL_STRATEGIC` memory. This role owns only the strategy and memory of its workflow.
