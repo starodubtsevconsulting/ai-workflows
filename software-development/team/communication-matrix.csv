@@ -1,32 +1,38 @@
 from_agent,to_agent,allowed,purpose
+Human,Admin,true,Initialize reconcile replace archive or recover workflow agent topology
+Admin,Human,true,Report lifecycle result blocked state failure or required Human decision
 Human,Designer Reviewer,true,Primary direct design and development conversation surface
-Human,Strategist,true,Direct workflow-level strategy and prioritization when appropriate
+Human,Strategist,true,Direct workflow-level strategy conversation when appropriate
 Human,Coder,true,Direct bounded implementation interaction when profile exposes Coder
 Human,Manager,false,Manager is not human-facing by default
-Human,Reviewer,false,Independent Reviewer normally sits behind workflow routing
-Human,Command Runner,false,Commands are reached through authorized roles or direct command routing rather than persona conversation
+Human,Command Runner,false,Commands are reached through authorized roles rather than persona conversation
+Admin,Strategist,false,No ordinary Admin-to-agent communication; lifecycle operations use runtime lifecycle mechanism
+Admin,Designer Reviewer,false,No ordinary Admin-to-agent communication; lifecycle operations use runtime lifecycle mechanism
+Admin,Coder,false,No ordinary Admin-to-agent communication; lifecycle operations use runtime lifecycle mechanism
+Admin,Manager,false,No ordinary Admin-to-agent communication; lifecycle operations use runtime lifecycle mechanism
+Admin,Command Runner,false,Admin lifecycle command access must be explicitly granted separately if required
+Strategist,Admin,false,Admin is Human recovery/lifecycle surface rather than normal workflow collaborator
+Designer Reviewer,Admin,false,Escalate lifecycle/recovery need to Human rather than invoking Admin directly
+Coder,Admin,false,Escalate lifecycle/recovery need through normal caller/Human path
+Manager,Admin,false,Manager does not invoke Admin
+Command Runner,Admin,false,Command Runner does not converse with Admin as an agent target
 Designer Reviewer,Human,true,Discuss design trade-offs decisions and implementation-conformance findings
 Strategist,Human,true,Discuss workflow strategy priorities and durable decisions
 Coder,Human,true,Discuss bounded implementation when exposed as human-facing
 Strategist,Designer Reviewer,true,Delegate or discuss design work
 Strategist,Coder,true,Delegate bounded implementation when design context is sufficient
 Strategist,Manager,true,Request ticket/work coordination
-Designer Reviewer,Manager,true,Request ticket information creation or updates because Designer Reviewer has no direct tracker capability
-Designer Reviewer,Coder,true,Communicate design intent and request implementation corrections
-Designer Reviewer,Reviewer,true,Coordinate independent review evidence
-Coder,Manager,true,Request ticket information or updates
-Coder,Designer Reviewer,true,Clarify design and return implementation for conformance review
-Coder,Reviewer,true,Submit implementation for independent review
+Designer Reviewer,Manager,true,Request ticket information creation or updates
+Designer Reviewer,Coder,true,Communicate design intent and request implementation/corrections
+Designer Reviewer,Command Runner,true,Request authorized bounded operations
+Coder,Manager,false,Ticket context should be supplied with task; Coder does not normally invoke Manager
+Coder,Designer Reviewer,true,Clarify design and report implementation completion/blocking
 Coder,Command Runner,true,Request authorized bounded operations
-Reviewer,Manager,true,Request ticket information when review requires it
-Reviewer,Coder,true,Return implementation findings
-Reviewer,Designer Reviewer,true,Raise design-related findings
 Manager,Strategist,true,Return coordination status or escalate prioritization
 Manager,Designer Reviewer,true,Return requested ticket/work information
-Manager,Coder,true,Route bounded implementation work or return ticket context
-Manager,Reviewer,true,Return requested ticket context
+Manager,Coder,true,Route supplied bounded implementation context when workflow requires
+Manager,Command Runner,true,Request authorized bounded operations when granted
 Command Runner,Strategist,true,Return bounded execution result
 Command Runner,Designer Reviewer,true,Return bounded execution result
 Command Runner,Coder,true,Return bounded execution result
-Command Runner,Reviewer,true,Return bounded execution result
 Command Runner,Manager,true,Return bounded execution result
