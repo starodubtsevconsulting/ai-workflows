@@ -8,7 +8,7 @@ A workflow represents a reusable human or business activity. It is not an agent,
 
 Conceptually:
 
-`Workflow + Roles + Strategy + Memory + Events -> adaptive Flow -> runtime Agents -> Outcomes/Evidence`
+`Workflow + Roles + Strategy + Memory + Events + Commands -> adaptive Flow -> runtime Agents -> Outcomes/Evidence`
 
 A Workflow Strategist owns domain continuity and determines/adapts strategy and flow. The Global Governor sits above workflows and owns cross-workflow WHY/WHEN, allocation and human-aware strategy.
 
@@ -85,7 +85,35 @@ The workflow SHOULD NOT assume that one static pipeline is universally correct u
 
 Conceptually:
 
-`event -> state/decision -> role/action -> result event`
+`event -> state/decision -> role/action/command -> result event`
+
+### Connected commands
+
+Every `workflow.md` MUST contain a **Connected commands** table listing commands that the workflow can call directly.
+
+Commands are reusable bounded actions defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands). A workflow references a command rather than duplicating its specification or implementation.
+
+Required table shape:
+
+| Command | Reference | Used by / purpose |
+| --- | --- | --- |
+| None yet | — | Commands will be connected as the workflow is implemented. |
+
+When commands are connected:
+
+- use the canonical command identifier/path from `ai-commands`;
+- link to the command definition in the AI Commands repository;
+- describe why/where the workflow may invoke it;
+- list only commands callable directly by this workflow;
+- do not duplicate the command's internal specification;
+- runtime/profile configuration may further restrict command availability and authorization;
+- declaring a command does not grant credentials or bypass runtime safety/permission boundaries.
+
+The section and table are REQUIRED even when the workflow currently has no connected commands.
+
+**Command** = bounded reusable action.
+
+**Workflow** = continuing activity that composes roles, strategy, memory, events, flow and connected commands.
 
 ### Memory
 The workflow MUST declare its memory semantics using [`_common/memory.md`](_common/memory.md).
@@ -151,6 +179,7 @@ A new workflow is structurally complete when:
 - [ ] roles/composition are defined;
 - [ ] strategy semantics are defined;
 - [ ] events and adaptive flow semantics are defined;
+- [ ] Connected commands table exists and references `ai-commands`;
 - [ ] memory class/boundary is defined;
 - [ ] inputs/outputs/evidence are defined;
 - [ ] runtime independence is defined;
