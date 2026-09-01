@@ -50,6 +50,12 @@ The bookkeeping workflow may watch/index these folders, classify newly added doc
 
 The Workflow Strategist's `WORKFLOW_STRATEGIC` memory stores durable bookkeeping decisions, classification rules, learned exceptions and outcomes rather than duplicating the complete document archive into conversational memory.
 
+## Prompt routing / use cases
+
+| Example prompt / intent | Route type | Route target | Result / notes |
+| --- | --- | --- | --- |
+|  |  |  |  |
+
 ## Connected commands
 
 Commands are defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
