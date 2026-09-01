@@ -4,8 +4,9 @@ Workflow-local realizations of reusable roles. Values are provider-independent d
 
 | Agent | Role | Human-facing override | Intelligence | Reasoning | Context | Memory | Lifecycle | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Strategist | [`Workflow Strategist`](../_common/roles/workflow/strategist.md) |  | highest-available | high | largest-available | `WORKFLOW_STRATEGIC` + external memory | persistent | Preserves development strategy, decisions and continuity across sessions. |
-| Designer Reviewer | [`Designer Reviewer`](../_common/roles/designer-reviewer.md) |  | high | high | large | `SESSION` + optional external task/design continuity | ephemeral | Designs first, then reviews implementation against its design; keep alive/recoverable through the implementation/review cycle when possible. |
+| Strategist | [`Workflow Strategist`](../_common/roles/workflow/strategist.md) |  | highest-available | high | largest-available | `WORKFLOW_STRATEGIC` + external memory | persistent | Preserves development strategy, decisions and continuity across sessions; controls disclosure of strategic memory to execution agents according to policy/Human authorization. |
+| Judge | [`Judge`](../_common/roles/judge.md) | true | high | high | large | `SESSION` | ephemeral | Human-only governance surface for changing rules and checking rule compliance. Other agents cannot directly invoke Judge. |
+| Designer Reviewer | [`Designer Reviewer`](../_common/roles/designer-reviewer.md) |  | high | high | large | `SESSION` | ephemeral | Designs and performs design-conformance review. No external memory by default; may request strategic context through the Strategist when needed. |
 | Coder | [`Coder`](../_common/roles/coder.md) |  | medium | medium | medium | `SESSION` | ephemeral | Bounded implementation worker; intended to be replaceable frequently between tasks/iterations. |
 | Reviewer | [`Reviewer`](../_common/roles/reviewer.md) |  | high | high | medium | `SESSION` | ephemeral | Independent correctness/quality/risk review, separate from Designer Reviewer's design-conformance review. |
 | Manager | [`Manager`](../_common/roles/manager.md) |  | medium | medium | medium | `SESSION` | ephemeral | Reactive coordination/ticket responsibility; normally behind routing. |
