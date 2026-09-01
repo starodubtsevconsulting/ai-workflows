@@ -39,8 +39,8 @@ A flow is a bounded process inside this long-lived workflow. Strategy may change
 | “Why is this failing?” / “Debug this.” | flow | [`debugging`](flows/debugging.md) | Investigate evidence, isolate cause, correct and verify. |
 | “Review this PR.” | flow | [`review`](flows/review.md) | Independent review and findings/correction routing. |
 | “Let's release it.” | flow | [`release`](flows/release.md) | Enter authorized release/readiness flow. |
-| “Push these changes.” | command | `source-control` (planned) | Direct bounded source-control action when the command is connected and context/authorization is sufficient. |
-| “Check the new ticket.” | role | `Manager` (planned) | Manager owns the responsibility and may use a future ticket-tracker command. |
+| “Push these changes.” | command | [`source-control`](https://github.com/starodubtsevconsulting/ai-commands/tree/main/source-control) | Direct bounded source-control action when context/authorization is sufficient. |
+| “Check the new ticket.” | role | `Manager` (planned) | Manager owns the responsibility and may invoke [`ticket-tracker`](https://github.com/starodubtsevconsulting/ai-commands/tree/main/ticket-tracker). |
 | “What should we build first?” | strategist | Workflow Strategist | Requires prioritization/strategy rather than a bounded command. |
 
 ## Connected commands
@@ -49,7 +49,8 @@ Commands are defined in the [AI Commands repository](https://github.com/starodub
 
 | Command | Reference | Used by / purpose |
 | --- | --- | --- |
-| None yet | — | `source-control` and ticket-tracker-style commands are planned examples but are not declared connected until they exist in `ai-commands`. |
+| `source-control` | [AI Commands / source-control](https://github.com/starodubtsevconsulting/ai-commands/tree/main/source-control) | Bounded repository/source-control operations, including the direct “push these changes” routing example. |
+| `ticket-tracker` | [AI Commands / ticket-tracker](https://github.com/starodubtsevconsulting/ai-commands/tree/main/ticket-tracker) | Ticket/issue retrieval and future authorized updates; intended primarily as a capability used through a Manager-style role. |
 
 ## Runtime independence
 
