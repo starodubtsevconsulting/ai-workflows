@@ -35,25 +35,38 @@ Coder,implementation decisions,allowed,May make bounded implementation-level dec
 Coder,architecture ownership,denied,Must ask Designer Reviewer when blocked by or requiring design change
 Coder,product specification modify,denied,Does not change product/design specification
 Coder,governance rule modify,denied,Cannot change AI Commands/AI Workflows rules
-Coder,runtime logs and diagnostics,delegated,Must use Command Runner/logs command so large raw logs can be bounded summarized or filtered before reaching Coder
+Coder,runtime logs and diagnostics,delegated,Must use Command Runner/logs command
 Coder,git history and diff read,command,May invoke source-control command directly
 Coder,git commit,command,May invoke source-control command directly
 Coder,git push,command,May invoke source-control command directly subject to runtime authorization
 Coder,git branch create,command,May invoke source-control command directly
 Coder,git merge,command,May invoke source-control command directly only when workflow authorization/readiness permits
-Coder,ticket tracker read,denied,Assigned ticket/context should be supplied with the task; Coder does not fetch tickets as normal work
+Coder,ticket tracker read,denied,Assigned ticket/context should be supplied with task
 Coder,ticket tracker create/update,denied,Not responsible for ticket-management flow
-Coder,internet/web research,denied,Research belongs to Designer Reviewer or another designated role
-Coder,designer reviewer communication,allowed,May ask Designer Reviewer when blocked and reports completion back to Designer Reviewer
-Coder,independent reviewer request,denied,Reports completion to Designer Reviewer rather than initiating independent review
-Coder,implementation completion report,allowed,May report that assigned implementation work is complete but does not make final acceptance/readiness decision
+Coder,internet/web research,denied,Research belongs to Designer Reviewer or designated role
+Coder,designer reviewer communication,allowed,May ask Designer Reviewer when blocked and reports completion back
+Coder,independent reviewer request,denied,Reports completion to Designer Reviewer
+Coder,implementation completion report,allowed,May report work complete but cannot make final acceptance decision
 Coder,strategic memory direct access,denied,No access to Strategist persistent memory
 Coder,strategist communication,denied,Does not request strategic context directly
 Reviewer,independent review,owner,Independent correctness quality and risk review
 Reviewer,implementation ownership,denied,Returns findings rather than taking over implementation
-Manager,ticket and work coordination,owner,Reactive coordination responsibility
-Manager,ticket tracker read,allowed,May retrieve/search tickets through ticket-tracker command
-Manager,ticket tracker create/update,allowed,May create/update tickets when authorized
+Manager,ticket and work coordination,owner,Reactive operational coordination responsibility
+Manager,ticket tracker read/search,allowed,May retrieve search and list tickets through ticket-tracker command
+Manager,ticket tracker create/update,allowed,May create tickets update fields/status and add comments when authorized
+Manager,ticket archive,allowed,Archives completed/obsolete tickets when tracker supports archival
+Manager,ticket delete,denied,Must not delete tickets; archive instead
+Manager,ticket assignment,allowed,May assign/reassign tickets when instructed or when assignment criteria are supplied
+Manager,subtask creation,allowed,May create subtasks from supplied decomposition
+Manager,ticket priority execution,allowed,May set/update priority after obtaining the priority decision from an appropriate reasoning agent
+Manager,ticket priority independent decision,denied,Must ask an appropriate agent such as Designer Reviewer when priority is not already supplied
+Manager,work decomposition,denied,Not intelligent/authoritative enough to break design/work into tickets; asks an appropriate reasoning agent and then creates supplied decomposition
+Manager,source code read,denied,No source-code responsibility
+Manager,source code modify,denied,No implementation responsibility
+Manager,build test execution,denied,No build/test responsibility
+Manager,internet/web research,denied,No research responsibility
+Manager,judge communication,denied,Cannot invoke Judge
+Manager,persistent project management memory,denied,No persistent project-management memory by default
 Manager,human conversation,denied,Not human-facing by default
 Command Runner,bounded command execution,owner,Executes authorized commands without assuming strategic responsibility
 Command Runner,workflow strategy,denied,Does not invent strategy or ownership
