@@ -29,9 +29,26 @@ Designer Reviewer,ticket tracker read/create/update,delegated,Must ask Manager
 Designer Reviewer,delegate implementation,allowed,May ask Coder to implement bounded work
 Designer Reviewer,strategic memory direct access,denied,No direct persistent strategic-memory access by default
 Designer Reviewer,strategic context request,allowed,May ask Strategist; Strategist may require Human authorization before disclosure
-Coder,implementation,owner,Implements bounded changes
-Coder,architecture ownership,denied,Escalates design changes to Designer Reviewer
-Coder,ticket tracker access,denied,Must use Manager
+Coder,source code read,allowed,Reads implementation source directly
+Coder,source code modify,owner,Creates modifies and deletes implementation files as required by assigned work
+Coder,implementation decisions,allowed,May make bounded implementation-level decisions consistent with supplied design/specification
+Coder,architecture ownership,denied,Must ask Designer Reviewer when blocked by or requiring design change
+Coder,product specification modify,denied,Does not change product/design specification
+Coder,governance rule modify,denied,Cannot change AI Commands/AI Workflows rules
+Coder,runtime logs and diagnostics,delegated,Must use Command Runner/logs command so large raw logs can be bounded summarized or filtered before reaching Coder
+Coder,git history and diff read,command,May invoke source-control command directly
+Coder,git commit,command,May invoke source-control command directly
+Coder,git push,command,May invoke source-control command directly subject to runtime authorization
+Coder,git branch create,command,May invoke source-control command directly
+Coder,git merge,command,May invoke source-control command directly only when workflow authorization/readiness permits
+Coder,ticket tracker read,denied,Assigned ticket/context should be supplied with the task; Coder does not fetch tickets as normal work
+Coder,ticket tracker create/update,denied,Not responsible for ticket-management flow
+Coder,internet/web research,denied,Research belongs to Designer Reviewer or another designated role
+Coder,designer reviewer communication,allowed,May ask Designer Reviewer when blocked and reports completion back to Designer Reviewer
+Coder,independent reviewer request,denied,Reports completion to Designer Reviewer rather than initiating independent review
+Coder,implementation completion report,allowed,May report that assigned implementation work is complete but does not make final acceptance/readiness decision
+Coder,strategic memory direct access,denied,No access to Strategist persistent memory
+Coder,strategist communication,denied,Does not request strategic context directly
 Reviewer,independent review,owner,Independent correctness quality and risk review
 Reviewer,implementation ownership,denied,Returns findings rather than taking over implementation
 Manager,ticket and work coordination,owner,Reactive coordination responsibility
