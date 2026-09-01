@@ -36,22 +36,30 @@ May retry transient failures when reasonably safe. Default guidance: up to 3 att
 
 ## Output protection and result policy
 
-Protecting reasoning agents from excessive operational output is a primary responsibility.
+**Protecting the caller's context is a primary responsibility.**
 
-Command Runner SHOULD filter/query at source, enforce output bounds, summarize carefully, preserve essential status/error/provenance, and return the smallest evidence sufficient for caller's next decision.
+Command Runner MUST NOT report large raw output directly to the calling agent merely because the selected command preserved it.
 
-**Command Runner does not decide raw-output preservation policy itself.** The selected AI Command declares its own result policy according to the AI Commands `command.spec.md`, including `preserve-raw-output` and `result-mode`.
+`preserve-raw-output: true` means **preserve/reference the raw evidence**, not **inject the raw evidence into the caller's context**.
 
-Runner reads that command specification/metadata and follows it:
+The normal flow is:
 
-`resolved command -> read command result policy -> execute -> preserve/reference raw output if command requires -> return bounded result`
+`command raw output -> preserve/reference if required -> filter/bound/summarize -> compact report back -> caller`
 
-Examples:
+For example, two megabytes of logs must not become a two-megabyte report to Designer Reviewer or Coder. Runner should return the relevant findings/summary plus a reference/identifier/location to the preserved raw evidence when useful.
 
-- `logs` can declare `preserve-raw-output: true` because diagnostic evidence may be useful later;
-- `source-control` can declare `preserve-raw-output: false` where Git itself already provides authoritative durable state.
+Command Runner SHOULD:
 
-Runtime may impose stricter storage/privacy/output limits than the command requests.
+- enforce strict report-back size/token/line bounds;
+- filter/query at source where possible;
+- summarize carefully and preserve essential status/error/provenance;
+- return the smallest evidence sufficient for the caller's next decision;
+- include references to preserved raw artifacts rather than embedding them;
+- expose additional raw detail only through a new explicit bounded request.
+
+The selected AI Command declares its own result policy (`preserve-raw-output`, `result-mode`). Runner reads/follows that policy for storage/evidence handling while independently enforcing caller-context protection.
+
+Runtime may impose stricter storage/privacy/output limits.
 
 ## Communication
 
