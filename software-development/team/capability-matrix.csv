@@ -1,0 +1,8 @@
+agent,capability,ownership,notes
+Strategist,workflow strategy,owner,Owns durable development strategy and continuity
+Designer Reviewer,design and architecture,owner,Owns design intent
+Designer Reviewer,implementation conformance review,owner,Reviews implementation against established design
+Coder,implementation,owner,Implements bounded changes
+Reviewer,independent review,owner,Independent correctness quality and risk review
+Manager,ticket and work coordination,owner,Reactive coordination responsibility
+Command Runner,bounded command execution,owner,Executes authorized commands without assuming strategic responsibility
