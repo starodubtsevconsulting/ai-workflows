@@ -1,8 +1,22 @@
 agent,capability,ownership,notes
+Human,workflow interaction,owner,Human initiates work through human-facing agents and remains final authority
+Human,design discussion,allowed,May directly collaborate with Designer Reviewer
+Human,ticket tracker access,denied,Uses a human-facing agent which delegates ticket operations to Manager
 Strategist,workflow strategy,owner,Owns durable development strategy and continuity
+Strategist,cross-flow prioritization,owner,Prioritizes work inside Software Development
 Designer Reviewer,design and architecture,owner,Owns design intent
 Designer Reviewer,implementation conformance review,owner,Reviews implementation against established design
+Designer Reviewer,ticket tracker access,denied,Must ask Manager for ticket retrieval creation or updates
+Designer Reviewer,source control execution,denied,Delegates bounded source-control operations to an authorized execution path
 Coder,implementation,owner,Implements bounded changes
+Coder,architecture ownership,denied,Escalates design changes to Designer Reviewer
+Coder,ticket tracker access,denied,Must use Manager when ticket information or changes are required
 Reviewer,independent review,owner,Independent correctness quality and risk review
+Reviewer,implementation ownership,denied,Returns findings rather than silently taking over implementation
+Reviewer,ticket tracker access,denied,Uses Manager when ticket interaction is required
 Manager,ticket and work coordination,owner,Reactive coordination responsibility
+Manager,ticket tracker read,allowed,May retrieve and search tickets through connected ticket-tracker command
+Manager,ticket tracker create/update,allowed,May create or update tickets when workflow/runtime authorization permits
+Manager,human conversation,denied,Not human-facing by default; humans reach it through a human-facing agent
 Command Runner,bounded command execution,owner,Executes authorized commands without assuming strategic responsibility
+Command Runner,workflow strategy,denied,Does not invent strategy or ownership
