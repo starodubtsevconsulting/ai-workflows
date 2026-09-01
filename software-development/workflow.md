@@ -20,6 +20,14 @@ The Strategist provides continuity across Software Development sessions. Designe
 
 Workflow/project facts, decisions and learned principles belong to durable Software Development memory. Each session receives a compiled task-relevant projection.
 
+## Connected commands
+
+Commands are defined in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
+
+| Command | Reference | Used by / purpose |
+| --- | --- | --- |
+| None yet | — | Commands will be connected as the workflow is implemented. |
+
 ## Runtime independence
 
 This workflow defines roles and coordination, not concrete agents, models, providers or harnesses. A profile/runtime resolves the workflow's role requirements into actual agent instances.
