@@ -4,10 +4,20 @@ Human,design discussion,allowed,May directly collaborate with Designer Reviewer
 Human,ticket tracker access,denied,Uses a human-facing agent which delegates ticket operations to Manager
 Strategist,workflow strategy,owner,Owns durable development strategy and continuity
 Strategist,cross-flow prioritization,owner,Prioritizes work inside Software Development
+Designer Reviewer,human conversation,allowed,Primary human-facing design and development surface
+Designer Reviewer,source code read,allowed,Reads source code directly without delegation
+Designer Reviewer,source code modify,denied,Never modifies implementation source code; delegates implementation to Coder
 Designer Reviewer,design and architecture,owner,Owns design intent
 Designer Reviewer,implementation conformance review,owner,Reviews implementation against established design
-Designer Reviewer,ticket tracker access,denied,Must ask Manager for ticket retrieval creation or updates
-Designer Reviewer,source control execution,denied,Delegates bounded source-control operations to an authorized execution path
+Designer Reviewer,test and build execution,delegated,Must use Command Runner for tests builds scripts and custom execution
+Designer Reviewer,git history and diff read,delegated,Must use Command Runner which routes through source-control command
+Designer Reviewer,git commit,delegated,Must use Command Runner/source-control command
+Designer Reviewer,git push,delegated,Must use Command Runner/source-control command
+Designer Reviewer,git branch create,delegated,Must use Command Runner/source-control command
+Designer Reviewer,ticket tracker read,delegated,Must ask Manager
+Designer Reviewer,ticket tracker create/update,delegated,Must ask Manager
+Designer Reviewer,delegate implementation,allowed,May ask Coder to implement bounded work
+Designer Reviewer,independent review request,delegated,May request independent review through Command Runner/routing rather than performing the independent Reviewer role itself
 Coder,implementation,owner,Implements bounded changes
 Coder,architecture ownership,denied,Escalates design changes to Designer Reviewer
 Coder,ticket tracker access,denied,Must use Manager when ticket information or changes are required
