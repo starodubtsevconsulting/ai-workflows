@@ -1,17 +1,30 @@
 from_agent,to_agent,allowed,purpose
+Human,Designer Reviewer,true,Primary direct design and development conversation surface
+Human,Strategist,true,Direct workflow-level strategy and prioritization when appropriate
+Human,Coder,true,Direct bounded implementation interaction when profile exposes Coder
+Human,Manager,false,Manager is not human-facing by default
+Human,Reviewer,false,Independent Reviewer normally sits behind workflow routing
+Human,Command Runner,false,Commands are reached through authorized roles or direct command routing rather than persona conversation
+Designer Reviewer,Human,true,Discuss design trade-offs decisions and implementation-conformance findings
+Strategist,Human,true,Discuss workflow strategy priorities and durable decisions
+Coder,Human,true,Discuss bounded implementation when exposed as human-facing
 Strategist,Designer Reviewer,true,Delegate or discuss design work
 Strategist,Coder,true,Delegate bounded implementation when design context is sufficient
-Strategist,Manager,true,Request work or ticket coordination
+Strategist,Manager,true,Request ticket/work coordination
+Designer Reviewer,Manager,true,Request ticket information creation or updates because Designer Reviewer has no direct tracker capability
 Designer Reviewer,Coder,true,Communicate design intent and request implementation corrections
 Designer Reviewer,Reviewer,true,Coordinate independent review evidence
+Coder,Manager,true,Request ticket information or updates
 Coder,Designer Reviewer,true,Clarify design and return implementation for conformance review
 Coder,Reviewer,true,Submit implementation for independent review
 Coder,Command Runner,true,Request authorized bounded operations
+Reviewer,Manager,true,Request ticket information when review requires it
 Reviewer,Coder,true,Return implementation findings
 Reviewer,Designer Reviewer,true,Raise design-related findings
 Manager,Strategist,true,Return coordination status or escalate prioritization
-Manager,Coder,true,Route bounded implementation work
-Manager,Designer Reviewer,true,Route design-related work
+Manager,Designer Reviewer,true,Return requested ticket/work information
+Manager,Coder,true,Route bounded implementation work or return ticket context
+Manager,Reviewer,true,Return requested ticket context
 Command Runner,Strategist,true,Return bounded execution result
 Command Runner,Designer Reviewer,true,Return bounded execution result
 Command Runner,Coder,true,Return bounded execution result
