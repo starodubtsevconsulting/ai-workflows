@@ -12,23 +12,58 @@ A workflow represents a reusable human or business activity. A flow is a bounded
 
 `Role definition -> agents.md realization -> Team relationships -> command policy -> runtime agent`
 
+## Agent lifecycle: minimal active roster
+
+A workflow SHOULD keep the active agent population as small as practical.
+
+- Create/activate agents only when their responsibility requires them.
+- Ephemeral workers should be retired/archived when bounded responsibility ends.
+- Do not keep duplicate agents alive without a specific lifecycle/availability reason.
+- Persistent agents are justified by durable continuity, scheduled responsibility or another explicit workflow need.
+- Temporary overlap is allowed when safe replacement requires it, but should end as soon as the successor is verified.
+- Prefer recoverable archival/deactivation over destructive deletion unless a workflow explicitly requires otherwise.
+
+The goal is not minimum agent count at any cost; it is **minimum necessary active authority and resource usage**.
+
+## Optional Admin
+
+A workflow MAY define an `Admin` agent. Admin is not mandatory.
+
+When present, Admin is a Human-facing operational lifecycle/recovery role rather than a normal domain worker.
+
+Typical responsibilities may include:
+
+- initialize/bootstrap the workflow's declared agent roster;
+- create/activate agents required by the workflow;
+- reinitialize or replace broken/stale agent instances;
+- archive/deactivate agents no longer required;
+- reconcile runtime roster with workflow definition;
+- restore a valid workflow runtime state when normal routing/lifecycle is stuck;
+- provide a Human-controlled operational recovery path when agents cannot unblock themselves under normal rules.
+
+Conceptually:
+
+`Human -> normal human-facing agent(s) -> normal workflow work`
+
+Recovery/lifecycle path when Admin exists:
+
+`Human -> Admin -> initialize/reconcile/replace/archive workflow agents`
+
+Admin does not participate in ordinary domain work merely because it has lifecycle authority. Admin also does not replace Judge: governance/rule changes remain Human -> Judge.
+
+Admin authority MUST be explicitly represented in team capability/communication/command policy like any other agent. Its lifecycle authority is not an unrestricted bypass of workflow governance.
+
+### Admin replacement
+
+If Admin itself must be replaced, successor-first handoff is preferred:
+
+`active Admin -> create successor -> verify successor identity/readiness -> archive predecessor`
+
+If successor verification fails, predecessor remains active. Temporary overlap exists only for the bounded handoff and does not imply ordinary Admin-to-Admin communication authority.
+
 ## Required folder structure
 
-Every concrete workflow MUST contain:
-
-```text
-<workflow-id>/
-  README.md
-  workflow.md
-  agents.md
-  team/
-    README.md
-    capability-matrix.csv
-    communication-matrix.csv
-    command-matrix.csv
-```
-
-Optional folders may include `strategies/`, `flows/`, `examples/`, `tests/`, and `adapters/`.
+Every concrete workflow MUST contain `README.md`, `workflow.md`, `agents.md`, and `team/` with `README.md`, `capability-matrix.csv`, `communication-matrix.csv`, and `command-matrix.csv`.
 
 ## agents.md
 
@@ -38,60 +73,15 @@ Required for every workflow. It defines workflow-local agent realizations and pr
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  |  |  |  |  |  |  |  |  |  |  |
 
+Every workflow SHOULD make the Admin decision explicit in `agents.md`/workflow documentation: Admin is either defined with concrete properties or intentionally absent.
+
 ### Scheduled agent semantics
 
-Every agent realization MUST explicitly declare whether it is expected to run periodically/proactively without a direct conversational invocation.
-
-- `Scheduled = yes` — runtime should support periodic/event-triggered activation for this agent.
-- `Scheduled = no` — agent normally exists only when invoked/routed by a session, Human, agent, flow or event explicitly requiring it.
-- `Schedule intent` describes WHY it wakes, not a hard-coded cron expression. Concrete cadence/timing belongs to runtime/profile configuration unless the workflow itself requires a specific cadence.
-
-Scheduling does **not** mean continuous surveillance. A scheduled Judge, for example, may periodically sample/review activity for governance violations rather than observing every interaction in real time.
-
-Scheduling also grants no extra commands, memory or authority. Every scheduled run uses the same team capability/communication/command boundaries as any other invocation.
-
-Examples:
-
-- Manager: `Scheduled=yes`, intent: periodically inspect work/ticket state and surface/perform allowed coordination actions.
-- Judge: `Scheduled=yes`, intent: periodically audit agent/workflow activity for rule compliance and abuse of authority.
-- Coder: normally `Scheduled=no`; implementation is invoked for bounded work.
+Every agent realization explicitly declares scheduled yes/no and why it wakes. Scheduling does not mean continuous surveillance and grants no additional authority.
 
 ## team/
 
-Required shared coordination and authority contract.
-
-### team/README.md
-
-| Agent | Responsibility | Human-facing | Works with / delegates to |
-| --- | --- | --- | --- |
-|  |  |  |  |
-
-### team/capability-matrix.csv
-
-```csv
-agent,capability,ownership,notes
-,,,
-```
-
-### team/communication-matrix.csv
-
-```csv
-from_agent,to_agent,allowed,purpose
-,,,
-```
-
-### team/command-matrix.csv
-
-Every workflow MUST define per-agent AI Command access:
-
-```csv
-agent,command,access,notes
-,,,
-```
-
-Commands are not granted by default. `allowed` explicitly grants eligibility subject to runtime authorization; `forbidden` documents an explicit no-go; omission means not granted.
-
-Command Runner may route/execute configured AI Commands only after checking the caller's effective command policy and cannot lend its own broader access to callers. Direct command invocation uses the same policy.
+Required shared coordination/authority contract with capability, communication and command matrices. Commands are not granted by default. Missing communication/command grants are not allowed by default; explicit forbidden entries document intentional no-go boundaries.
 
 ## workflow.md
 
@@ -105,11 +95,7 @@ Required authoritative workflow contract with standard sections/placeholders for
 
 ### Connected commands
 
-Required even when empty; references reusable commands from the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
-
-| Command | Reference | Used by / purpose |
-| --- | --- | --- |
-| None yet | — | Commands will be connected as the workflow is implemented. |
+Required even when empty; references reusable commands from the AI Commands repository.
 
 ## Concepts
 
@@ -123,7 +109,9 @@ Required even when empty; references reusable commands from the [AI Commands rep
 
 **Agent** = workflow/runtime realization of a role.
 
-**Scheduled agent** = agent realization that runtime periodically/event-triggeredly activates for a declared purpose; not a continuously running observer by implication.
+**Admin** = optional Human-facing workflow lifecycle/recovery agent; not a normal domain worker and not a governance-rule authority.
+
+**Scheduled agent** = periodically/event-triggeredly activated agent for declared purpose.
 
 **Team** = relationships/ownership/communication/command authority among agents.
 
@@ -131,7 +119,7 @@ Required even when empty; references reusable commands from the [AI Commands rep
 
 ## Memory
 
-Workflows declare memory semantics using [`_common/memory.md`](_common/memory.md). Strategic roles may own persistent memory; execution roles normally use session context unless explicitly specified.
+Workflows declare memory semantics using `_common/memory.md`. Strategic roles may own persistent memory; execution roles normally use session context unless explicitly specified.
 
 ## Runtime boundary
 
@@ -140,10 +128,12 @@ Workflow definitions remain provider independent. Runtime/profile maps abstract 
 ## Minimum acceptance checklist
 
 - [ ] required skeleton exists even when empty;
-- [ ] `agents.md` includes `Scheduled` and `Schedule intent` columns;
-- [ ] every defined agent explicitly declares scheduled yes/no;
-- [ ] scheduled agents state why they wake;
-- [ ] scheduling does not broaden authority;
+- [ ] workflow explicitly defines Admin or states Admin is intentionally absent;
+- [ ] active roster follows minimum-necessary lifecycle principle;
+- [ ] ephemeral agents have a retirement/archive path;
+- [ ] Admin, when present, is Human-facing and lifecycle/recovery scoped;
+- [ ] Admin does not replace Judge/governance;
+- [ ] every defined agent declares scheduled yes/no and schedule intent;
 - [ ] team matrices exist;
 - [ ] command access is not granted unless explicit;
 - [ ] Prompt routing/use cases and Connected commands exist;
