@@ -12,8 +12,6 @@ A workflow represents a reusable human or business activity. A flow is a bounded
 
 `Role definition -> agents.md realization -> Team relationships -> command policy -> runtime agent`
 
-`Caller agent -> Command Runner/direct command routing -> command-policy check -> AI Command -> bounded result`
-
 ## Required folder structure
 
 Every concrete workflow MUST contain:
@@ -32,17 +30,31 @@ Every concrete workflow MUST contain:
 
 Optional folders may include `strategies/`, `flows/`, `examples/`, `tests/`, and `adapters/`.
 
-Reusable role definitions belong under `_common/roles/`; workflows specialize them through `agents.md`.
-
 ## agents.md
 
-Required for every workflow:
+Required for every workflow. It defines workflow-local agent realizations and provider-independent runtime hints.
 
-| Agent | Role | Human-facing override | Intelligence | Reasoning | Context | Memory | Lifecycle | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-|  |  |  |  |  |  |  |  |  |
+| Agent | Role | Human-facing override | Intelligence | Reasoning | Context | Memory | Lifecycle | Scheduled | Schedule intent | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  |  |  |  |  |  |  |
 
-It defines workflow-local agent realizations and provider-independent runtime hints.
+### Scheduled agent semantics
+
+Every agent realization MUST explicitly declare whether it is expected to run periodically/proactively without a direct conversational invocation.
+
+- `Scheduled = yes` — runtime should support periodic/event-triggered activation for this agent.
+- `Scheduled = no` — agent normally exists only when invoked/routed by a session, Human, agent, flow or event explicitly requiring it.
+- `Schedule intent` describes WHY it wakes, not a hard-coded cron expression. Concrete cadence/timing belongs to runtime/profile configuration unless the workflow itself requires a specific cadence.
+
+Scheduling does **not** mean continuous surveillance. A scheduled Judge, for example, may periodically sample/review activity for governance violations rather than observing every interaction in real time.
+
+Scheduling also grants no extra commands, memory or authority. Every scheduled run uses the same team capability/communication/command boundaries as any other invocation.
+
+Examples:
+
+- Manager: `Scheduled=yes`, intent: periodically inspect work/ticket state and surface/perform allowed coordination actions.
+- Judge: `Scheduled=yes`, intent: periodically audit agent/workflow activity for rule compliance and abuse of authority.
+- Coder: normally `Scheduled=no`; implementation is invoked for bounded work.
 
 ## team/
 
@@ -70,54 +82,16 @@ from_agent,to_agent,allowed,purpose
 
 ### team/command-matrix.csv
 
-Every workflow MUST define per-agent AI Command access. This is the authoritative workflow-level command authorization matrix used by Command Runner/direct command routing.
-
-Canonical shape:
+Every workflow MUST define per-agent AI Command access:
 
 ```csv
 agent,command,access,notes
 ,,,
 ```
 
-`access` is normally one of:
+Commands are not granted by default. `allowed` explicitly grants eligibility subject to runtime authorization; `forbidden` documents an explicit no-go; omission means not granted.
 
-- `allowed` — the agent may request/invoke this command subject to runtime/command-level authorization;
-- `forbidden` — explicit no-go even if the command exists globally;
-- absence of a command row — **not allowed by default**.
-
-The policy is therefore **allowlist-first / fail-closed**. A command existing in the AI Commands repository does not make it available to every agent.
-
-Explicit `forbidden` rows are encouraged for important boundaries because they document intentional no-go capabilities rather than relying only on omission.
-
-A workflow may expose many globally available AI Commands while granting each agent only the subset appropriate to its responsibility.
-
-Conceptually:
-
-`AI Commands catalog` = everything the runtime could potentially know how to execute.
-
-`workflow Connected commands` = commands relevant/connected to this workflow.
-
-`team/command-matrix.csv` = which workflow agents are actually allowed or explicitly forbidden to request each connected command.
-
-`runtime/command authorization` = final environmental/credential/safety gate.
-
-All gates must pass.
-
-### Command Runner authorization behavior
-
-Command Runner may understand/route to any command defined in the configured AI Commands catalog, but MUST execute on behalf of a caller only after checking the caller's effective command policy.
-
-Example:
-
-`Designer Reviewer -> Command Runner: retrieve logs`
-
-Command Runner resolves `logs`, checks whether Designer Reviewer has `logs=allowed`, then executes only if the workflow and runtime also permit it.
-
-If a command is absent or forbidden for the caller, Command Runner refuses rather than finding a workaround.
-
-Command Runner does not grant its own broad command capability to callers. It is an enforcement/execution boundary, not a privilege-escalation mechanism.
-
-Direct command invocation by an agent (for example Coder -> `source-control`) MUST apply the same command matrix and runtime authorization checks.
+Command Runner may route/execute configured AI Commands only after checking the caller's effective command policy and cannot lend its own broader access to callers. Direct command invocation uses the same policy.
 
 ## workflow.md
 
@@ -137,8 +111,6 @@ Required even when empty; references reusable commands from the [AI Commands rep
 | --- | --- | --- |
 | None yet | — | Commands will be connected as the workflow is implemented. |
 
-Connected Commands declares workflow relevance, while `team/command-matrix.csv` declares per-agent authorization.
-
 ## Concepts
 
 **Workflow** = long-lived domain/activity.
@@ -151,11 +123,11 @@ Connected Commands declares workflow relevance, while `team/command-matrix.csv` 
 
 **Agent** = workflow/runtime realization of a role.
 
+**Scheduled agent** = agent realization that runtime periodically/event-triggeredly activates for a declared purpose; not a continuously running observer by implication.
+
 **Team** = relationships/ownership/communication/command authority among agents.
 
 **Command** = bounded reusable action.
-
-**Command Runner** = bounded command resolver/executor that enforces caller command policy; not an authority-escalation mechanism.
 
 ## Memory
 
@@ -163,18 +135,16 @@ Workflows declare memory semantics using [`_common/memory.md`](_common/memory.md
 
 ## Runtime boundary
 
-Workflow definitions remain provider independent. Runtime/profile maps abstract requirements to concrete models, commands, credentials and integrations and provides the final authorization gate.
+Workflow definitions remain provider independent. Runtime/profile maps abstract requirements to concrete models, schedules/triggers, commands, credentials and integrations and provides final authorization.
 
 ## Minimum acceptance checklist
 
 - [ ] required skeleton exists even when empty;
-- [ ] `README.md`, `workflow.md`, `agents.md` exist;
-- [ ] `team/README.md` exists;
-- [ ] `team/capability-matrix.csv` exists;
-- [ ] `team/communication-matrix.csv` exists;
-- [ ] `team/command-matrix.csv` exists with canonical header even if empty;
-- [ ] command access is fail-closed: missing means not allowed;
-- [ ] important no-go commands are explicitly marked `forbidden` where useful;
-- [ ] Prompt routing/use cases table exists;
-- [ ] Connected commands table exists;
+- [ ] `agents.md` includes `Scheduled` and `Schedule intent` columns;
+- [ ] every defined agent explicitly declares scheduled yes/no;
+- [ ] scheduled agents state why they wake;
+- [ ] scheduling does not broaden authority;
+- [ ] team matrices exist;
+- [ ] command access is not granted unless explicit;
+- [ ] Prompt routing/use cases and Connected commands exist;
 - [ ] memory/runtime/privacy boundaries are represented.
