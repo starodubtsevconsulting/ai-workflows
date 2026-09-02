@@ -54,6 +54,30 @@ Every workflow owns static Team definition under `team/`. Team defines collabora
 
 Keep active population as small as practical. Prefer recoverable archival/deactivation over destructive deletion. Multiple instances of one role are allowed when justified.
 
+Every configured runtime AI agent MUST declare a clone policy. An agent without a clone policy is considered **incompletely initialized** and MUST NOT enter normal active workflow operation.
+
+Clone policy is harness-neutral. Runtime/harness adapters expose the best context-health signals they support.
+
+Signal precedence:
+
+1. if a reliable context-compaction count/equivalent is available, use the configured compaction threshold;
+2. otherwise, if reliable context utilization/pressure is available, use the configured utilization threshold;
+3. otherwise, automatic context-health cloning is unavailable and lifecycle authority must not invent a signal.
+
+The configuration describes policy rather than a specific harness API. A harness may expose compactions, remaining context, token utilization, context pressure, or an equivalent normalized signal.
+
+Recommended representation in `agents.md` is explicit columns for the primary and fallback thresholds:
+
+| Agent | Clone after compactions | Clone at context utilization | ... |
+| --- | ---: | ---: | --- |
+| Example Worker | 1 | 75% | ... |
+
+`Clone after compactions` means clone when the observed count is greater than or equal to the configured value. `Clone at context utilization` is the fallback when the primary compaction/equivalent signal is unavailable.
+
+A workflow/profile/runtime MAY override thresholds explicitly for a concrete deployment, but omission is not a valid active-agent configuration.
+
+The common behavioral response to an authorized cloning signal is inherited from [`role.spec.md`](role.spec.md).
+
 ## Staffing authorities
 
 Workflow declares which agents may change runtime membership. Staffing changes update authoritative runtime roster/trust state.
@@ -72,9 +96,9 @@ Defines workflow-local realizations of reusable roles and concrete implementatio
 
 ### Agent properties
 
-| Agent | Role | Human-facing override | Intelligence | Reasoning | Context | Memory | Lifecycle | Scheduled | Schedule intent | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-|  |  |  |  |  |  |  |  |  |  |  |
+| Agent | Role | Human-facing override | Intelligence | Reasoning | Context | Memory | Lifecycle | Clone after compactions | Clone at context utilization | Scheduled | Schedule intent | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
+|  |  |  |  |  |  |  |  |  |  |  |  |  |
 
 ### Capability implementation bindings
 
@@ -150,6 +174,8 @@ Runtime/profile resolves active source/project and maps requirements/bindings to
 - [ ] source/project resolution defined;
 - [ ] roles contain conceptual capabilities, not concrete command bindings;
 - [ ] `agents.md` contains capability implementation bindings table;
+- [ ] every active agent declares clone-after-compactions and fallback context-utilization thresholds;
+- [ ] agents without clone policy are treated as incompletely initialized;
 - [ ] concrete command bindings are authorized separately by command matrix;
 - [ ] static Team policy separate from runtime roster;
 - [ ] every agent declares scheduled yes/no;
