@@ -1,5 +1,7 @@
 # Why Admin?
 
+![Admin role visual](img/admin.png)
+
 Sometimes the workflow itself gets stuck.
 
 An agent may need to be recreated, an ID may become stale, initialization may be incomplete, or the normal team rules may make recovery awkward. Asking another ordinary agent to break those rules would defeat the point of having the rules.
