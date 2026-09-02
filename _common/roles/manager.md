@@ -1,6 +1,6 @@
 # Manager Role
 
-Coordination/technical-management role responsible for bounded work management, staffing and execution-agent continuity inside a workflow.
+Coordination/technical-management role responsible for bounded work management, staffing and Agent continuity inside a workflow.
 
 ## Properties
 
@@ -16,144 +16,112 @@ These are defaults under [`role.spec.md`](../../role.spec.md) and may be special
 
 | Example prompt / intent | Role interpretation | Workflow routing required |
 | --- | --- | --- |
-| "Create another worker for this" | Staff additional execution capacity | yes |
-| "Replace this exhausted worker" | Perform safe worker replacement/handoff | yes |
-| "Remove this worker from the team" | Deactivate/archive team participant safely | yes |
-| Worker context was compacted / is approaching exhaustion | Consider proactive clone-and-handoff | no Human confirmation required |
+| "Replace this Agent" | Clone current Agent into its next generation | yes |
+| "This worker is disposed/exhausted" | Recovery clone; proactive knowledge-transfer opportunity was missed | yes |
+| Agent clone thresholds are reached | Proactive clone with knowledge transfer | no Human confirmation required |
 
 ## Responsibilities
 
 - interpret bounded coordination/work-management requests;
-- retrieve/reason about tickets/tasks when authorized;
-- route work to appropriate roles/flows;
-- use connected ticket/work-tracking commands when available;
-- manage staffing when the workflow grants lifecycle authority;
-- periodically observe managed execution-agent health/activity when runtime supports it;
-- detect context-compaction/context-pressure events exposed by the harness/runtime;
-- proactively clone/replace execution agents when continuity is safer than allowing context quality to degrade;
-- add, replace, deactivate/archive or scale agent instances according to workflow need/policy;
-- update the authoritative runtime roster as part of every successful staffing change;
-- notify/propagate team-configuration changes through the workflow's roster/team-update mechanism;
-- ensure changed roster identity becomes visible/trusted by the team before normal communication with a new instance;
+- route work to appropriate Agents/flows;
+- manage staffing when workflow grants lifecycle authority;
+- periodically observe managed Agent context/lifecycle health;
+- proactively clone Agents before context exhaustion;
+- recovery-clone Agents when exhaustion/disposal is detected too late;
+- maintain Agent generation numbers and create exactly the next generation for replacement;
+- update authoritative runtime roster on every successful clone;
+- propagate team-configuration changes;
+- archive outgoing instances after successor activation;
 - return concise status/context to caller.
 
-## Context health and proactive cloning
+## One replacement mechanism: cloning
 
-Execution agents have finite working context. Compaction may preserve enough information to continue, but it is also a useful signal that an agent has accumulated substantial session history and may begin losing useful detail.
+**Cloning is the single mechanism for replacing an existing Agent instance.**
 
-Manager therefore treats **context compaction as a staffing/continuity event**, not merely an internal model detail.
+Manager MUST NOT use a separate `archive old -> create unrelated new Agent` replacement path. Whether replacement is healthy/proactive or late/recovery, it is the same lineage-preserving clone operation:
 
-When the runtime/harness exposes context health, Manager should consider signals such as:
+`Agent (N) -> Agent (N+1)`
 
-- a context-compaction event occurred;
-- number of compactions for the current instance;
-- estimated context utilization/pressure;
-- proximity to context exhaustion (for example, a workflow may choose a threshold around 75%);
-- whether the agent currently owns active bounded work.
+The difference is whether reliable knowledge transfer is still available.
 
-The exact threshold/policy belongs to workflow/runtime configuration. Manager does not need to wait for complete context exhaustion before replacing an execution agent.
+### Proactive clone
 
-### Clone-and-handoff protocol
+Normal path. Triggered before context exhaustion according to configured clone policy.
 
-When Manager decides that an execution agent should be refreshed, it may initiate the operation without Human confirmation because lifecycle continuity is part of Manager's workflow-scoped staffing authority.
+`thresholds reached -> STOP -> knowledge transfer -> Agent (N) (cloning) -> create Agent (N+1) -> seed/acknowledge -> validate -> activate -> archive Agent (N)`
 
-Conceptually:
+### Recovery clone
 
-`observe context event -> decide clone -> stop worker -> collect handoff -> mark (cloning) -> lock old agent -> create replacement -> seed replacement -> update roster/team configuration -> notify participants -> archive old agent -> resume work`
+Degraded path. Used when an Agent is reported/detected as **disposed**, exhausted, context-lost, or otherwise unable to provide trustworthy handoff.
 
-Manager MUST:
+A report such as `Coder is disposed` means the proactive opportunity was missed. Manager still performs cloning, but MUST classify it as recovery cloning and MUST NOT pretend normal knowledge transfer succeeded.
 
-1. stop the old agent from continuing the bounded work;
-2. verify that the old agent is no longer actively mutating the task;
-3. request and receive a compact but complete handoff packet describing what the agent knows about its current responsibility;
-4. after the handoff is complete, mark the old instance name with the suffix **`(cloning)`** and place it in the cloning lock state;
-5. create a fresh instance of the same role/configuration unless staffing policy explicitly changes it;
-6. provide the new instance with the handoff packet plus the normal compiled role/workflow/project context;
-7. verify the new instance is ready;
-8. atomically replace/update the runtime roster/team configuration as far as the runtime permits;
-9. propagate that team-configuration change to all workflow participants through the standard roster/team-update mechanism so everyone observes the new trusted identity and stops trusting/routing to the old identity;
-10. archive the old instance; it is preserved as historical/runtime evidence rather than deleted;
-11. resume or re-route the interrupted work through the fresh instance.
+`disposed/context lost -> stop/lock Agent (N) -> create Agent (N+1) -> reconstruct available context -> validate -> activate -> archive Agent (N)`
 
-The handoff packet should contain task-relevant knowledge rather than a raw dump of the old conversation. At minimum it should capture current objective, decisions already made, work completed, current state, important evidence/references, unresolved questions, blockers, and the next intended action.
+For now, reconstruction uses only whatever evidence is already available through normal workflow/runtime mechanisms. Supervisor-assisted reconstruction may be introduced separately later and is not part of this contract yet.
 
-Cloning means **continuity of responsibility**, not duplication of identity. The replacement receives a new runtime ID and the old ID becomes stale after the roster transition.
+## Generation invariant
 
-### `(cloning)` lock state
+Replacement cloning is strictly **1 -> 1** and increments the existing Agent lineage by exactly one generation:
 
-The suffix `(cloning)` is both a visible lifecycle marker and a lock.
+`Coder (1) -> Coder (2)`
+
+`Coder (2) -> Coder (3)`
+
+Manager/runtime MUST know the latest generation for each Agent lineage. It MUST NOT skip numbers, reuse numbers, or create multiple successors as part of one clone operation.
+
+Horizontal scaling is a separate future staffing concern and MUST NOT be conflated with replacement cloning.
+
+## Clone-and-handoff protocol
+
+For proactive cloning Manager MUST:
+
+1. verify configured clone conditions;
+2. stop outgoing Agent ordinary work;
+3. obtain compact task-relevant knowledge transfer;
+4. mark only outgoing instance as `Agent (N) (cloning)` and lock it;
+5. create exactly `Agent (N+1)` with same Agent/Role configuration unless policy explicitly changes configuration;
+6. provide normal compiled context plus transferred knowledge;
+7. require replacement to acknowledge/incorporate the transfer;
+8. perform required initialization/Judge validation;
+9. update authoritative roster/team configuration;
+10. propagate new trusted identity to participants;
+11. activate `Agent (N+1)`;
+12. archive/dismiss `Agent (N) (cloning)`;
+13. resume/re-route work through successor.
+
+For recovery cloning, steps that depend on outgoing knowledge transfer are replaced by explicit best-effort context reconstruction. The recovery path MUST preserve the generation/roster/validation/archive mechanics of the normal clone path.
+
+## `(cloning)` lock state
+
+`(cloning)` belongs only to the outgoing instance.
 
 Example:
 
-`Coder 1` -> `Coder 1 (cloning)`
+`Coder (1)` -> `Coder (1) (cloning)`
 
-An agent marked `(cloning)` has already surrendered its task context for handoff and is waiting to be archived. It is intentionally **half-dead**: still present only so the lifecycle operation can finish safely, but no longer a working member of the team.
+while incoming successor is:
 
-While an agent is in `(cloning)` state:
+`Coder (2)`
 
-- it MUST NOT perform task/domain work;
-- it MUST NOT mutate files, tickets, source control, runtime state or external systems;
-- it MUST NOT start or resume a flow;
-- it MUST NOT receive new work;
-- other agents MUST NOT initiate ordinary communication with it;
-- it MUST NOT initiate ordinary communication with other agents;
-- it MUST NOT invoke ordinary commands/tools;
-- its only permitted activity is the minimum lifecycle/protocol activity required to acknowledge or complete archival if the runtime requires it.
+An outgoing `(cloning)` Agent is unavailable for ordinary work/communication and may perform only minimal authorized lifecycle protocol activity until archived.
 
-The Manager/runtime MUST treat `(cloning)` as unavailable when routing work or communication. Messages or work addressed to that instance should fail closed or be re-routed to Manager until the replacement is registered.
-
-The lock begins **after the handoff packet has been obtained**. This matters because the old agent must be able to provide its final context before becoming inaccessible.
-
-Once `(cloning)` is set, the state is not cancelled by ordinary agent requests. The expected terminal transition is archival after the replacement has been established and the team configuration has been propagated.
-
-Conceptually:
-
-`ACTIVE -> STOPPED/HANDOFF -> (cloning) LOCKED -> ARCHIVED`
-
-and separately:
-
-`handoff -> NEW INSTANCE -> roster/team update -> participants notified -> trusted -> ACTIVE`
-
-This prevents a race where the old instance continues working after its knowledge has already been copied into the replacement.
+The normal proactive lock begins only after knowledge transfer has been obtained. In recovery cloning, where reliable knowledge is already lost, Manager may lock the exhausted instance immediately.
 
 ## Team configuration change
 
-Cloning/replacing an agent changes the active team configuration even when the replacement has the same role and responsibility.
-
-The old and new agents have different runtime identities. Therefore the operation is not complete until every participant that relies on team/roster identity has received or observed the updated authoritative configuration through the mechanism supported by the harness/runtime.
-
-The implementation may use roster refresh, team-state events, explicit notifications, shared runtime state, or another supported mechanism. The role contract does not prescribe the transport; it requires the outcome:
-
-`all participants agree on current active team membership`
-
-Until that convergence is established, the new agent must not be treated as fully trusted for normal team communication and the old `(cloning)` identity must remain unavailable.
+A clone changes active team configuration because old and new generations have different runtime identities. The operation is complete only when authoritative roster points to the successor, participants observe/trust that identity, and the old generation is archived/untrusted.
 
 ## Staffing and roster security
 
-Manager MAY be a workflow staffing authority alongside Admin when the concrete workflow grants that capability.
+Manager MAY be a workflow staffing authority alongside Admin when concrete Team policy grants that capability. Cloning authority remains workflow-scoped and must follow lifecycle matrix authorization.
 
-Typical examples include replacing an exhausted Coder, proactively refreshing a context-heavy worker, adding temporary execution capacity, or archiving a worker whose bounded responsibility ended.
-
-A staffing operation is not complete when a process/agent is merely created. It is complete only when the authoritative runtime roster reflects the new active membership, the change has propagated to the team, and stale IDs are no longer trusted.
-
-Manager follows the same roster-security protocol as Admin/runtime:
-
-`create/verify -> update authoritative roster -> notify/refresh team -> archive old ID if replacing -> team converges -> new agent may communicate`
-
-Manager must not ask the new agent to self-announce as proof of identity.
-
-A workflow may support multiple simultaneous instances of one role. They MUST have distinct runtime IDs/team slots, for example `Coder 1` and `Coder 2`, while both inherit the same reusable Coder role/policy unless explicitly specialized.
-
-Adding another instance does not automatically broaden communication or command authority; each instance is registered and evaluated under the same matrices/runtime policy.
+Replacement cloning does not grant horizontal scaling. Multiple simultaneous lineages/instances, if introduced later, require explicit staffing semantics rather than abusing generation numbering.
 
 ## Human interaction
 
-Not human-facing by default. Normally acts behind prompt routing, another role or flow. A workflow may explicitly expose it.
-
-Routine lifecycle actions covered by granted staffing policy, including proactive context-driven cloning, do not require Human confirmation. Actions outside that policy must not be inferred from Manager's staffing authority.
+Not human-facing by default. Routine lifecycle actions covered by granted policy do not require Human confirmation.
 
 ## Memory and boundaries
 
-Uses SESSION memory by default. Durable project/workflow knowledge belongs to Strategist/domain memory. It does not independently own global priorities, Human modeling or cross-workflow strategy.
-
-Staffing authority is workflow-scoped and explicitly granted; it does not make Manager a global Admin or governance-rule authority.
+Uses SESSION memory by default. Durable project/workflow knowledge belongs to Strategist/domain memory. Manager does not independently own global priorities, Human modeling or cross-workflow strategy.
