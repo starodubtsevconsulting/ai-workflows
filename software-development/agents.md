@@ -6,13 +6,28 @@ Workflow-local realizations of reusable roles. Roles define conceptual capabilit
 
 | Agent | Role | Human-facing override | Intelligence | Reasoning | Context | Memory | Lifecycle | Scheduled | Schedule intent | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Strategist | [`Workflow Strategist`](../_common/roles/workflow/strategist.md) |  | highest-available | high | large | `WORKFLOW_STRATEGIC` + external workflow memory | persistent | no | — | Owns Software Development HOW and durable domain continuity. |
+| Strategist | [`Strategist`](../_common/roles/strategist.md) |  | highest-available | high | large | `WORKFLOW_STRATEGIC` + external workflow memory | persistent | no | — | Owns Software Development HOW and durable domain continuity. |
 | Judge | [`Judge`](../_common/roles/judge.md) | true | high | high | large | `SESSION` | ephemeral | yes | Periodically audit activity for rule compliance/authority abuse. | Scope is bound below; conversation cannot redefine it. |
 | Designer Reviewer | [`Designer Reviewer`](../_common/roles/designer-reviewer.md) |  | high | high | large | `SESSION` | ephemeral | no | — | Design and implementation-conformance reasoning. |
 | Coder | [`Coder`](../_common/roles/coder.md) |  | medium | medium | medium | `SESSION` | ephemeral | no | — | Bounded implementation worker. |
-| Manager | [`Manager`](../_common/roles/manager.md) |  | medium | medium | medium | `SESSION` | ephemeral | yes | Periodically inspect tracked-work state and perform/surface allowed coordination. | Reactive plus scheduled checks. |
+| Manager | [`Manager`](../_common/roles/manager.md) |  | medium | medium | medium | `SESSION` | ephemeral | yes | Periodically inspect tracked-work and execution-agent context/lifecycle state; perform allowed coordination and continuity actions. | Reactive plus scheduled checks; Software Development cloning authority. |
 | Command Runner | [`Command Runner`](../_common/roles/command-runner.md) |  | low | low | small | `SESSION` | ephemeral | no | — | Dynamic bounded capability routing/execution. |
 | UI Acceptance Tester | [`UI Acceptance Tester`](../_common/roles/ui-acceptance-tester.md) |  | medium | medium | medium | `PROJECT` | persistent | no | — | Maintains project-specific executable UI acceptance coverage. |
+
+## Agent lifecycle authority
+
+The common clone lifecycle is inherited from [`role.spec.md`](../role.spec.md). This workflow binds the abstract lifecycle authority concretely.
+
+| Authority | May clone/replace | Notes |
+| --- | --- | --- |
+| Manager | Software Development execution/team agents within its granted lifecycle scope | Primary automatic cloning authority. May act from context-health/compaction signals without Human confirmation. |
+| Admin | As permitted by the Admin lifecycle/recovery contract when Admin is present in the runtime | Human-controlled recovery/lifecycle authority; not managed by Manager. |
+
+Manager MUST NOT clone, inspect lifecycle/context-health metadata of, or otherwise administer Admin. Admin remains outside Manager's lifecycle authority.
+
+All clone targets validate the request against the active authoritative team/lifecycle configuration before obeying it. The target role does not need to know that "Manager" is universally responsible; that binding exists here because it is specific to Software Development.
+
+A successful replacement changes the runtime team configuration and therefore requires roster update, propagation to participants, trust convergence, and archival of the old `(cloning)` instance according to the common lifecycle contract.
 
 ## Judge authoritative governance scope
 
@@ -42,6 +57,7 @@ Bindings fill gap between reusable role concepts and concrete infrastructure. Th
 | Coder | runtime diagnostics | command | `logs` | Routed according to Team policy. |
 | Coder | code/filesystem editing | harness | configured harness code/filesystem capability | Runtime/profile selects harness. |
 | Manager | tracked-work/ticket management | command | `ticket-tracker` | Provider resolved from project/profile. |
+| Manager | agent lifecycle/context health | runtime | harness/runtime agent inspection + lifecycle controls | Supports context monitoring, cloning, roster transition and archival. |
 | Judge | governance source control | command | `source-control` | Applies Human-authored in-scope governance changes. |
 | Command Runner | dynamic bounded command execution | runtime | registered AI Command catalog + caller policy | Resolved command still requires authorization. |
 | UI Acceptance Tester | computer use / vision | command | `computer-use` | Harness/provider resolved at runtime. |
