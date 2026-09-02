@@ -4,15 +4,17 @@ Workflow-local realizations of reusable roles. Roles define conceptual capabilit
 
 ## Agent properties
 
-| Agent | Role | Human-facing override | Intelligence | Reasoning | Context | Memory | Lifecycle | Scheduled | Schedule intent | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Strategist | [`Strategist`](../_common/roles/strategist.md) |  | highest-available | high | large | `WORKFLOW_STRATEGIC` + external workflow memory | persistent | no | — | Owns Software Development HOW and durable domain continuity. |
-| Judge | [`Judge`](../_common/roles/judge.md) | true | high | high | large | `SESSION` | ephemeral | yes | Periodically audit activity for rule compliance/authority abuse. | Scope is bound below; conversation cannot redefine it. |
-| Designer Reviewer | [`Designer Reviewer`](../_common/roles/designer-reviewer.md) |  | high | high | large | `SESSION` | ephemeral | no | — | Design and implementation-conformance reasoning. |
-| Coder | [`Coder`](../_common/roles/coder.md) |  | medium | medium | medium | `SESSION` | ephemeral | no | — | Bounded implementation worker. |
-| Manager | [`Manager`](../_common/roles/manager.md) |  | medium | medium | medium | `SESSION` | ephemeral | yes | Periodically inspect tracked-work and execution-agent context/lifecycle state; perform allowed coordination and continuity actions. | Reactive plus scheduled checks; Software Development cloning authority. |
-| Command Runner | [`Command Runner`](../_common/roles/command-runner.md) |  | low | low | small | `SESSION` | ephemeral | no | — | Dynamic bounded capability routing/execution. |
-| UI Acceptance Tester | [`UI Acceptance Tester`](../_common/roles/ui-acceptance-tester.md) |  | medium | medium | medium | `PROJECT` | persistent | no | — | Maintains project-specific executable UI acceptance coverage. |
+| Agent | Role | Human-facing override | Intelligence | Reasoning | Context | Memory | Lifecycle | Clone after compactions | Clone at context utilization | Scheduled | Schedule intent | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
+| Strategist | [`Strategist`](../_common/roles/strategist.md) |  | highest-available | high | large | `WORKFLOW_STRATEGIC` + external workflow memory | persistent | 3 | 85% | no | — | Owns Software Development HOW and durable domain continuity. |
+| Judge | [`Judge`](../_common/roles/judge.md) | true | high | high | large | `SESSION` | ephemeral | 3 | 85% | yes | Periodically audit activity for rule compliance/authority abuse. | Scope is bound below; conversation cannot redefine it. |
+| Designer Reviewer | [`Designer Reviewer`](../_common/roles/designer-reviewer.md) |  | high | high | large | `SESSION` | ephemeral | 3 | 80% | no | — | Design and implementation-conformance reasoning. |
+| Coder | [`Coder`](../_common/roles/coder.md) |  | medium | medium | medium | `SESSION` | ephemeral | 1 | 75% | no | — | Bounded implementation worker. |
+| Manager | [`Manager`](../_common/roles/manager.md) |  | medium | medium | medium | `SESSION` | ephemeral | 1 | 75% | yes | Periodically inspect tracked-work and execution-agent context/lifecycle state; perform allowed coordination and continuity actions. | Reactive plus scheduled checks; Software Development cloning authority; may initiate its own replacement under lifecycle policy. |
+| Command Runner | [`Command Runner`](../_common/roles/command-runner.md) |  | low | low | small | `SESSION` | ephemeral | 2 | 75% | no | — | Dynamic bounded capability routing/execution. |
+| UI Acceptance Tester | [`UI Acceptance Tester`](../_common/roles/ui-acceptance-tester.md) |  | medium | medium | medium | `PROJECT` | persistent | 2 | 80% | no | — | Maintains project-specific executable UI acceptance coverage. |
+
+Clone policy uses compaction/equivalent count as the preferred signal when the harness exposes it. Context utilization is the fallback signal, not an additional requirement. Thresholds are initial policy values and may be tuned as runtime evidence accumulates.
 
 ## Agent lifecycle authority
 
@@ -20,7 +22,7 @@ The common clone lifecycle is inherited from [`role.spec.md`](../role.spec.md). 
 
 | Authority | May clone/replace | Notes |
 | --- | --- | --- |
-| Manager | Software Development execution/team agents within its granted lifecycle scope | Primary automatic cloning authority. May act from context-health/compaction signals without Human confirmation. |
+| Manager | Software Development execution/team agents within its granted lifecycle scope, including Manager itself | Primary automatic cloning authority. May act from context-health/compaction signals without Human confirmation. Self-replacement uses the same handoff/roster/archive protocol. |
 | Admin | As permitted by the Admin lifecycle/recovery contract when Admin is present in the runtime | Human-controlled recovery/lifecycle authority; not managed by Manager. |
 
 Manager MUST NOT clone, inspect lifecycle/context-health metadata of, or otherwise administer Admin. Admin remains outside Manager's lifecycle authority.
