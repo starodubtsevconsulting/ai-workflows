@@ -33,6 +33,7 @@ These are defaults under [`role.spec.md`](../../role.spec.md) and may be special
 - proactively clone/replace execution agents when continuity is safer than allowing context quality to degrade;
 - add, replace, deactivate/archive or scale agent instances according to workflow need/policy;
 - update the authoritative runtime roster as part of every successful staffing change;
+- notify/propagate team-configuration changes through the workflow's roster/team-update mechanism;
 - ensure changed roster identity becomes visible/trusted by the team before normal communication with a new instance;
 - return concise status/context to caller.
 
@@ -58,20 +59,20 @@ When Manager decides that an execution agent should be refreshed, it may initiat
 
 Conceptually:
 
-`observe context event -> decide clone -> stop worker -> collect handoff -> mark (cloning) -> lock old agent -> create replacement -> seed replacement -> update roster -> retire old agent -> resume work`
+`observe context event -> decide clone -> stop worker -> collect handoff -> mark (cloning) -> lock old agent -> create replacement -> seed replacement -> update roster/team configuration -> notify participants -> archive old agent -> resume work`
 
 Manager MUST:
 
 1. stop the old agent from continuing the bounded work;
 2. verify that the old agent is no longer actively mutating the task;
-3. request a compact but complete handoff packet describing what the agent knows about its current responsibility;
+3. request and receive a compact but complete handoff packet describing what the agent knows about its current responsibility;
 4. after the handoff is complete, mark the old instance name with the suffix **`(cloning)`** and place it in the cloning lock state;
 5. create a fresh instance of the same role/configuration unless staffing policy explicitly changes it;
 6. provide the new instance with the handoff packet plus the normal compiled role/workflow/project context;
 7. verify the new instance is ready;
-8. atomically replace/update the runtime roster identity as far as the runtime permits;
-9. make the roster change observable to the team so the new ID becomes trusted and the stale ID is rejected;
-10. retire/archive the old instance;
+8. atomically replace/update the runtime roster/team configuration as far as the runtime permits;
+9. propagate that team-configuration change to all workflow participants through the standard roster/team-update mechanism so everyone observes the new trusted identity and stops trusting/routing to the old identity;
+10. archive the old instance; it is preserved as historical/runtime evidence rather than deleted;
 11. resume or re-route the interrupted work through the fresh instance.
 
 The handoff packet should contain task-relevant knowledge rather than a raw dump of the old conversation. At minimum it should capture current objective, decisions already made, work completed, current state, important evidence/references, unresolved questions, blockers, and the next intended action.
@@ -86,7 +87,7 @@ Example:
 
 `Coder 1` -> `Coder 1 (cloning)`
 
-An agent marked `(cloning)` has already surrendered its task context for handoff and is waiting to be retired. It is intentionally **half-dead**: still present only so the lifecycle operation can finish safely, but no longer a working member of the team.
+An agent marked `(cloning)` has already surrendered its task context for handoff and is waiting to be archived. It is intentionally **half-dead**: still present only so the lifecycle operation can finish safely, but no longer a working member of the team.
 
 While an agent is in `(cloning)` state:
 
@@ -97,35 +98,47 @@ While an agent is in `(cloning)` state:
 - other agents MUST NOT initiate ordinary communication with it;
 - it MUST NOT initiate ordinary communication with other agents;
 - it MUST NOT invoke ordinary commands/tools;
-- its only permitted activity is the minimum lifecycle/protocol activity required to acknowledge or complete retirement if the runtime requires it.
+- its only permitted activity is the minimum lifecycle/protocol activity required to acknowledge or complete archival if the runtime requires it.
 
 The Manager/runtime MUST treat `(cloning)` as unavailable when routing work or communication. Messages or work addressed to that instance should fail closed or be re-routed to Manager until the replacement is registered.
 
 The lock begins **after the handoff packet has been obtained**. This matters because the old agent must be able to provide its final context before becoming inaccessible.
 
-Once `(cloning)` is set, the state is not cancelled by ordinary agent requests. The expected terminal transition is retirement/archive after the replacement has been established.
+Once `(cloning)` is set, the state is not cancelled by ordinary agent requests. The expected terminal transition is archival after the replacement has been established and the team configuration has been propagated.
 
 Conceptually:
 
-`ACTIVE -> STOPPED/HANDOFF -> (cloning) LOCKED -> RETIRED`
+`ACTIVE -> STOPPED/HANDOFF -> (cloning) LOCKED -> ARCHIVED`
 
 and separately:
 
-`handoff -> NEW INSTANCE -> roster trusted -> ACTIVE`
+`handoff -> NEW INSTANCE -> roster/team update -> participants notified -> trusted -> ACTIVE`
 
 This prevents a race where the old instance continues working after its knowledge has already been copied into the replacement.
+
+## Team configuration change
+
+Cloning/replacing an agent changes the active team configuration even when the replacement has the same role and responsibility.
+
+The old and new agents have different runtime identities. Therefore the operation is not complete until every participant that relies on team/roster identity has received or observed the updated authoritative configuration through the mechanism supported by the harness/runtime.
+
+The implementation may use roster refresh, team-state events, explicit notifications, shared runtime state, or another supported mechanism. The role contract does not prescribe the transport; it requires the outcome:
+
+`all participants agree on current active team membership`
+
+Until that convergence is established, the new agent must not be treated as fully trusted for normal team communication and the old `(cloning)` identity must remain unavailable.
 
 ## Staffing and roster security
 
 Manager MAY be a workflow staffing authority alongside Admin when the concrete workflow grants that capability.
 
-Typical examples include replacing an exhausted Coder, proactively refreshing a context-heavy worker, adding temporary execution capacity, or retiring a worker whose bounded responsibility ended.
+Typical examples include replacing an exhausted Coder, proactively refreshing a context-heavy worker, adding temporary execution capacity, or archiving a worker whose bounded responsibility ended.
 
-A staffing operation is not complete when a process/agent is merely created. It is complete only when the authoritative runtime roster reflects the new active membership and stale IDs are no longer trusted.
+A staffing operation is not complete when a process/agent is merely created. It is complete only when the authoritative runtime roster reflects the new active membership, the change has propagated to the team, and stale IDs are no longer trusted.
 
 Manager follows the same roster-security protocol as Admin/runtime:
 
-`create/verify -> update authoritative roster -> retire old ID if replacing -> team observes roster -> new agent may communicate`
+`create/verify -> update authoritative roster -> notify/refresh team -> archive old ID if replacing -> team converges -> new agent may communicate`
 
 Manager must not ask the new agent to self-announce as proof of identity.
 
