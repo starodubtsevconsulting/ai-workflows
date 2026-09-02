@@ -18,6 +18,63 @@ Every reusable role MUST have a companion human-facing `why.md` explanation.
 
 Every role definition MUST contain Properties with at least `level`, `human-facing`, `interaction-mode`, `memory-class`, and `lifecycle`.
 
+## Agent instantiation contract
+
+A role definition is not yet a runtime agent. Instantiating a role as an agent requires the workflow/profile/runtime to fill the role's required runtime parameters and bindings.
+
+Every runtime AI agent MUST have, at minimum:
+
+- concrete runtime identity/team slot;
+- workflow binding and applicable source/project resolution;
+- role binding;
+- model/intelligence/reasoning/context configuration required by the workflow;
+- memory configuration;
+- lifecycle configuration;
+- scheduling configuration (`yes/no` plus intent when scheduled);
+- required capability implementation bindings;
+- applicable communication/command/lifecycle authorization from Team policy;
+- clone policy with `clone-after-compactions` and `clone-at-context-utilization` thresholds.
+
+Clone policy is harness-neutral. The runtime uses the best reliable signal exposed by the active harness/provider/runtime:
+
+1. compaction count or equivalent when available;
+2. otherwise context utilization/pressure when available;
+3. otherwise no automatic context-health clone decision may be invented.
+
+`clone-after-compactions` is the preferred threshold. `clone-at-context-utilization` is the fallback threshold when the primary signal is unavailable.
+
+A workflow/profile may explicitly override values for a concrete agent instance, but required parameters MUST resolve before the instance is considered ready.
+
+An agent with unresolved required instantiation parameters is **NOT READY**. It MUST NOT enter normal active workflow operation or be trusted as an initialized team participant.
+
+Conceptually:
+
+`Role + workflow bindings + runtime parameters + Team authority -> candidate Agent -> validation -> READY Agent`
+
+The workflow specification defines where workflow-local values are declared; this role specification defines that the values are required to instantiate the role.
+
+## Initialization validation
+
+Agent initialization is a governance boundary because it determines whether a runtime participant actually satisfies the role/workflow/team contract.
+
+The lifecycle/staffing authority that creates an agent is responsible for assembling a complete candidate instance. It MUST NOT mark/register that candidate as normally active merely because the process/chat/session exists.
+
+Before normal activation, the candidate configuration MUST be validated against applicable role, workflow and Team rules.
+
+Judge is the governance validator for this contract when the workflow defines a Judge. The candidate agent does not directly ask Judge for approval by default. Instead, the lifecycle/staffing authority submits or exposes the candidate configuration/runtime facts for validation. This preserves the normal communication boundary while giving Judge a bounded initialization-validation path.
+
+Conceptually:
+
+`lifecycle authority creates candidate -> Judge validates applicable rules -> PASS -> roster/team activation`
+
+`lifecycle authority creates candidate -> Judge finds violation -> NOT READY -> lifecycle authority fixes/recreates -> validate again`
+
+Initialization validation is a narrow governance interaction, not general permission for arbitrary agents to converse with Judge.
+
+Judge may also detect invalid/incomplete initialized agents during its scheduled runtime compliance audits. A participant that is missing required initialization data remains a governance violation even if it was accidentally admitted to the roster.
+
+When a workflow has no Judge, the runtime/lifecycle authority MUST still perform deterministic structural validation of required fields before activation; absence of Judge does not waive the instantiation contract.
+
 ## Role capabilities versus concrete commands
 
 Reusable roles describe **conceptual capabilities/responsibilities**, never concrete AI Command dependencies.
@@ -151,6 +208,8 @@ Every role SHOULD define purpose/responsibility, properties, prompt/intent scena
 - [ ] No concrete command is bound/linked as a role implementation.
 - [ ] Common communication/trust protocol is inherited rather than duplicated.
 - [ ] Runtime agent inherits the common clone lifecycle and validates cloning authority from active workflow/team configuration.
+- [ ] Agent instantiation resolves every required runtime parameter, including clone policy, before READY.
+- [ ] Initialization is validated before normal roster/team activation.
 - [ ] Role itself grants no concrete commands.
 - [ ] Workflow agent realization binds required capabilities to implementations.
 - [ ] Team command matrix remains authoritative for command permission.
