@@ -1,5 +1,7 @@
 # Why Judge?
 
+![Judge role visual](img/judge.png)
+
 When there are rules, sooner or later you need a judge.
 
 That is mostly why the role has such a short name. We did not need something elaborate like `Governance Compliance Supervisor`. There are rules, and this participant checks the rules, so: **Judge**.

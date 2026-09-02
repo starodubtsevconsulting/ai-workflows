@@ -1,5 +1,7 @@
 # Why Command Runner?
 
+![Command Runner role visual](img/command_runner.png)
+
 Imagine a Designer Reviewer looking at a failed application and saying:
 
 > Find out why it failed after the deployment.

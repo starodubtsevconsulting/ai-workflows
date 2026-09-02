@@ -1,5 +1,7 @@
 # Why Manager?
 
+![Manager role visual](img/manager.png)
+
 Reasoning about work and keeping track of work are not quite the same job.
 
 A Designer Reviewer may be better equipped to understand a difficult change, decompose it and propose a credible estimate. Somebody still needs to turn that reasoning into tracked tickets, assignments, priorities supplied by the right decision-maker, and an appropriately staffed team.

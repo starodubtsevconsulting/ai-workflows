@@ -1,5 +1,7 @@
 # Why Designer Reviewer?
 
+![Designer Reviewer role visual](img/designer-reviewer.png)
+
 Someone has to keep the picture of what we are actually trying to build while implementation is happening.
 
 The same role is also a useful Human-facing surface: the Human can discuss a design, ask whether an implementation matches it, or bring a pull request without needing to orchestrate the rest of the software-development team manually.
