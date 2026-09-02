@@ -1,5 +1,7 @@
 # Why Coder?
 
+![Coder role visual](img/coder.png)
+
 A software team still needs somebody whose job is simply to turn a bounded decision into working code.
 
 That is deliberately narrower than being architect, project manager, researcher or reviewer. If Coder starts deciding all of those things itself, every implementation task quietly becomes another design session and the workflow loses its boundaries.
