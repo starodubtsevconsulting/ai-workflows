@@ -1,39 +1,16 @@
 from_agent,to_agent,allowed,purpose
-Human,Admin,true,Human is the only normal caller of Admin
-Admin,Human,true,Report lifecycle/recovery results and request Human decisions
-Human,Designer Reviewer,true,Primary direct design and development conversation surface
-Human,Strategist,true,Direct workflow-level strategy conversation when appropriate
-Human,Coder,true,Direct bounded implementation interaction when profile exposes Coder
-Human,Manager,false,Manager is not human-facing by default
-Human,Command Runner,false,Commands are reached through authorized roles rather than persona conversation
-Admin,Strategist,true,Admin may directly inspect direct initialize unblock replace stop or otherwise administer workflow agent
-Admin,Designer Reviewer,true,Admin may directly inspect direct initialize unblock replace stop or otherwise administer workflow agent
-Admin,Coder,true,Admin may directly inspect direct initialize unblock replace stop or otherwise administer workflow agent
-Admin,Manager,true,Admin may directly inspect direct initialize unblock replace stop or otherwise administer workflow agent
-Admin,Command Runner,true,Admin may directly use/administer workflow execution capabilities within its workflow scope
-Strategist,Admin,false,No workflow agent may initiate communication with Admin
-Designer Reviewer,Admin,false,No workflow agent may initiate communication with Admin
-Coder,Admin,false,No workflow agent may initiate communication with Admin
-Manager,Admin,false,No workflow agent may initiate communication with Admin
-Command Runner,Admin,false,No workflow agent/execution role may initiate communication with Admin
-Judge,Admin,false,Judge does not initiate communication with Admin; both are Human-facing control surfaces with separate responsibilities
-Admin,Judge,false,Admin does not invoke Judge; governance changes remain Human -> Judge
-Designer Reviewer,Human,true,Discuss design trade-offs decisions and implementation-conformance findings
-Strategist,Human,true,Discuss workflow strategy priorities and durable decisions
-Coder,Human,true,Discuss bounded implementation when exposed as human-facing
-Strategist,Designer Reviewer,true,Delegate or discuss design work
-Strategist,Coder,true,Delegate bounded implementation when design context is sufficient
-Strategist,Manager,true,Request ticket/work coordination
-Designer Reviewer,Manager,true,Request ticket information creation or updates
-Designer Reviewer,Coder,true,Communicate design intent and request implementation/corrections
-Designer Reviewer,Command Runner,true,Request authorized bounded operations
-Coder,Manager,false,Ticket context should be supplied with task; Coder does not normally invoke Manager
-Coder,Designer Reviewer,true,Clarify design and report implementation completion/blocking
-Coder,Command Runner,true,Request authorized bounded operations
-Manager,Strategist,true,Return coordination status or escalate prioritization
-Manager,Designer Reviewer,true,Return requested ticket/work information
-Manager,Coder,true,Route supplied bounded implementation context when workflow requires
-Manager,Command Runner,true,Request authorized bounded operations when granted
+Human,Designer Reviewer,true,Software Development exposes this Worker directly for design/development conversation
+Designer Reviewer,Human,true,Report design trade-offs decisions and implementation-conformance findings
+Human,Coder,true,Software Development may expose this Worker for bounded implementation interaction
+Coder,Human,true,Discuss bounded implementation when exposed
+Designer Reviewer,Manager,true,Software Development Worker may request ticket/work coordination
+Designer Reviewer,Coder,true,Explicit Worker-to-Worker design/implementation route
+Designer Reviewer,Command Runner,true,Explicit Worker-to-Worker bounded operation route
+Coder,Designer Reviewer,true,Explicit Worker-to-Worker clarification/completion route
+Coder,Command Runner,true,Explicit Worker-to-Worker bounded operation route
+Manager,Designer Reviewer,true,Return requested ticket/work information to this Worker
+Manager,Coder,true,Route supplied bounded implementation context to this Worker
+Manager,Command Runner,true,Request authorized bounded operations from this Worker
 Command Runner,Strategist,true,Return bounded execution result
 Command Runner,Designer Reviewer,true,Return bounded execution result
 Command Runner,Coder,true,Return bounded execution result
