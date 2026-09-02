@@ -1,4 +1,4 @@
-from_role_type,to_role_type,operation,allowed,purpose
+from_role,to_role,operation,allowed,purpose
 Manager,Worker,inspect-health,true,Monitor managed workers for context/lifecycle continuity
 Manager,Worker,clone,true,Replace managed workers according to clone policy
 Manager,Manager,inspect-health,true,Monitor own context/lifecycle health
