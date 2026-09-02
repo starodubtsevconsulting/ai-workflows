@@ -1,5 +1,7 @@
 # Why Global Governor?
 
+![Global Governor role visual](../img/global_governor.png)
+
 A person can have perfectly reasonable goals and still spend the evening doing something that does not help any of them.
 
 The interesting question for a personal AI is therefore not only "can it do this?" but also "is this the right thing to do now?"
