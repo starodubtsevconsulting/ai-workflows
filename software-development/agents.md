@@ -1,14 +1,14 @@
 # Software Development Agents
 
-Workflow-local realizations of reusable roles. Roles define conceptual capabilities; this file binds those concepts to concrete workflow implementations. Team command matrix separately controls authorization.
+Workflow-local Agent configuration. The selected Team Template provides reusable roles/authority; this file names and configures the concrete Agents that fulfill those roles in Software Development. Team command matrix separately controls command authorization.
 
 ## Team template
 
 Software Development uses [`standard`](../_common/team-templates/standard/README.md).
 
-Concrete roles bind to reusable role types from that template:
+Concrete Agents fulfill reusable roles from that template:
 
-| Role | Role type |
+| Agent name | Role |
 | --- | --- |
 | Strategist | `Strategist` |
 | Judge | `Judge` |
@@ -19,25 +19,27 @@ Concrete roles bind to reusable role types from that template:
 | UI Acceptance Tester | `Worker` |
 | Admin (when present) | `Admin` |
 
+In informal/runtime language, **agent type** is a synonym for the Agent's role. It is not a separate architectural concept.
+
 Lifecycle authority is inherited from the template's [`lifecycle-matrix.csv`](../_common/team-templates/standard/lifecycle-matrix.csv). Workflow-local lifecycle policy should contain only explicit exceptions/overrides.
 
 ## Agent properties
 
 | Agent | Role | Human-facing override | Intelligence | Reasoning | Context | Memory | Lifecycle | Clone after compactions | Clone at context utilization | Scheduled | Schedule intent | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
-| Strategist | [`Strategist`](../_common/roles/strategist.md) |  | highest-available | high | large | `WORKFLOW_STRATEGIC` + external workflow memory | persistent | 3 | 85% | no | — | Owns Software Development HOW and durable domain continuity. |
-| Judge | [`Judge`](../_common/roles/judge.md) | true | high | high | large | `SESSION` | ephemeral | 3 | 85% | yes | Periodically sample activity for rule compliance/authority abuse. | Scope is bound below; conversation cannot redefine it. |
-| Designer Reviewer | [`Designer Reviewer`](../_common/roles/designer-reviewer.md) |  | high | high | large | `SESSION` | ephemeral | 3 | 80% | no | — | Design and implementation-conformance Worker. |
-| Coder | [`Coder`](../_common/roles/coder.md) |  | medium | medium | medium | `SESSION` | ephemeral | 1 | 75% | no | — | Bounded implementation Worker. |
-| Manager | [`Manager`](../_common/roles/manager.md) |  | medium | medium | medium | `SESSION` | ephemeral | 1 | 75% | yes | Periodically inspect tracked-work and execution-agent context/lifecycle state; perform allowed coordination and continuity actions. | Reactive plus scheduled checks; lifecycle authority inherited from standard template. |
-| Command Runner | [`Command Runner`](../_common/roles/command-runner.md) |  | low | low | small | `SESSION` | ephemeral | 2 | 75% | no | — | Dynamic bounded capability-routing/execution Worker. |
-| UI Acceptance Tester | [`UI Acceptance Tester`](../_common/roles/ui-acceptance-tester.md) |  | medium | medium | medium | `PROJECT` | persistent | 2 | 80% | no | — | Project-specific UI acceptance Worker. |
+| Strategist | `Strategist` |  | highest-available | high | large | `WORKFLOW_STRATEGIC` + external workflow memory | persistent | 3 | 85% | no | — | Owns Software Development HOW and durable domain continuity. |
+| Judge | `Judge` | true | high | high | large | `SESSION` | ephemeral | 3 | 85% | yes | Periodically sample activity for rule compliance/authority abuse. | Scope is bound below; conversation cannot redefine it. |
+| Designer Reviewer | `Worker` |  | high | high | large | `SESSION` | ephemeral | 3 | 80% | no | — | Design/architecture and implementation-conformance Worker. |
+| Coder | `Worker` |  | medium | medium | medium | `SESSION` | ephemeral | 1 | 75% | no | — | Bounded software implementation Worker. |
+| Manager | `Manager` |  | medium | medium | medium | `SESSION` | ephemeral | 1 | 75% | yes | Periodically inspect tracked-work and execution-agent context/lifecycle state; perform allowed coordination and continuity actions. | Reactive plus scheduled checks; lifecycle authority inherited from standard template. |
+| Command Runner | `Worker` |  | low | low | small | `SESSION` | ephemeral | 2 | 75% | no | — | Dynamic bounded capability-routing/execution Worker. |
+| UI Acceptance Tester | `Worker` |  | medium | medium | medium | `PROJECT` | persistent | 2 | 80% | no | — | Project-specific UI acceptance Worker. |
 
 Clone policy uses compaction/equivalent count as the preferred signal when the harness exposes it. Context utilization is the fallback signal, not an additional requirement. Thresholds are initial policy values and may be tuned as runtime evidence accumulates.
 
 ## Agent lifecycle authority
 
-The common clone lifecycle is inherited from [`role.spec.md`](../role.spec.md). Role-type lifecycle authority is inherited from the selected `standard` Team Template.
+The common clone lifecycle is inherited from [`role.spec.md`](../role.spec.md). Role lifecycle authority is inherited from the selected `standard` Team Template.
 
 Software Development currently defines **no lifecycle-authority override** to the standard template.
 
