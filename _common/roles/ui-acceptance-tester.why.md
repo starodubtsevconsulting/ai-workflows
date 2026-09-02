@@ -1,5 +1,7 @@
 # Why UI Acceptance Tester?
 
+![UI Acceptance Tester role visual](img/ui-acceptance-tester.png)
+
 End-to-end UI tests are valuable, but maintaining them can become tedious because the product keeps moving.
 
 Modern AI harnesses can often look at and interact with a real screen. That gives us another option: let an acceptance-testing agent use computer vision/computer-use to learn the interface when necessary, then turn what it learned into ordinary deterministic test code.
