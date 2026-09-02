@@ -2,6 +2,8 @@
 
 Reusable workflow definitions for coordinating AI-assisted work.
 
+> Part of the broader [AI public collection](https://github.com/starodubtsevconsulting/ai), which provides the overview, shared vocabulary, experiments, benchmarks, and links between the published AI projects.
+
 ```mermaid
 flowchart TD
   Profile["Profile: policy/configuration"] --> Workflow["Workflow"]
