@@ -30,9 +30,9 @@ The repository uses a small set of terms deliberately. The distinction matters b
 | **Team** | Workflow-specific set of participants plus collaboration/security/authorization policy. | Software Development Team |
 | **Team Template** | Reusable organizational/authority pattern expressed in Roles and inherited by workflows. | `standard` |
 | **Runtime roster** | Current mapping of active team Agents/instances to runtime identities and lifecycle state. | Coder 1 active; Coder 0 archived |
-| **Command / capability** | Bounded executable ability available to authorized Agents. | source control, ticket tracking |
 | **Source / Project** | Concrete subject/context a workflow operates on. Project is a common Software Development source type. | Repository/project A |
 | **[Profile](https://github.com/starodubtsevconsulting/ai-profile)** | External personal/organization configuration that activates workflows and supplies concrete runtime/project/provider policy. Profile belongs to the separate AI Profile project, not this repository. | [AI Profile repository](https://github.com/starodubtsevconsulting/ai-profile) |
+| **[Command](https://github.com/starodubtsevconsulting/ai-commands)** | Reusable bounded executable AI capability that Agents may invoke when workflow/team policy authorizes it. Commands are defined outside this repository and can be shared by many workflows. | [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands) |
 
 ### Role → Agent
 
