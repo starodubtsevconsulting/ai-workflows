@@ -58,24 +58,62 @@ When Manager decides that an execution agent should be refreshed, it may initiat
 
 Conceptually:
 
-`observe context event -> decide clone -> stop/pause worker -> request handoff context -> create replacement -> seed replacement -> update roster -> verify trust -> resume work`
+`observe context event -> decide clone -> stop worker -> collect handoff -> mark (cloning) -> lock old agent -> create replacement -> seed replacement -> update roster -> retire old agent -> resume work`
 
 Manager MUST:
 
-1. stop or pause the old agent from continuing the bounded work;
-2. verify that the old agent is no longer actively mutating the task before handoff;
+1. stop the old agent from continuing the bounded work;
+2. verify that the old agent is no longer actively mutating the task;
 3. request a compact but complete handoff packet describing what the agent knows about its current responsibility;
-4. create a fresh instance of the same role/configuration unless staffing policy explicitly changes it;
-5. provide the new instance with the handoff packet plus the normal compiled role/workflow/project context;
-6. verify the new instance is ready;
-7. atomically replace/update the runtime roster identity as far as the runtime permits;
-8. make the roster change observable to the team so the new ID becomes trusted and the stale ID is rejected;
-9. retire/archive the old instance;
-10. resume or re-route the interrupted work through the fresh instance.
+4. after the handoff is complete, mark the old instance name with the suffix **`(cloning)`** and place it in the cloning lock state;
+5. create a fresh instance of the same role/configuration unless staffing policy explicitly changes it;
+6. provide the new instance with the handoff packet plus the normal compiled role/workflow/project context;
+7. verify the new instance is ready;
+8. atomically replace/update the runtime roster identity as far as the runtime permits;
+9. make the roster change observable to the team so the new ID becomes trusted and the stale ID is rejected;
+10. retire/archive the old instance;
+11. resume or re-route the interrupted work through the fresh instance.
 
 The handoff packet should contain task-relevant knowledge rather than a raw dump of the old conversation. At minimum it should capture current objective, decisions already made, work completed, current state, important evidence/references, unresolved questions, blockers, and the next intended action.
 
 Cloning means **continuity of responsibility**, not duplication of identity. The replacement receives a new runtime ID and the old ID becomes stale after the roster transition.
+
+### `(cloning)` lock state
+
+The suffix `(cloning)` is both a visible lifecycle marker and a lock.
+
+Example:
+
+`Coder 1` -> `Coder 1 (cloning)`
+
+An agent marked `(cloning)` has already surrendered its task context for handoff and is waiting to be retired. It is intentionally **half-dead**: still present only so the lifecycle operation can finish safely, but no longer a working member of the team.
+
+While an agent is in `(cloning)` state:
+
+- it MUST NOT perform task/domain work;
+- it MUST NOT mutate files, tickets, source control, runtime state or external systems;
+- it MUST NOT start or resume a flow;
+- it MUST NOT receive new work;
+- other agents MUST NOT initiate ordinary communication with it;
+- it MUST NOT initiate ordinary communication with other agents;
+- it MUST NOT invoke ordinary commands/tools;
+- its only permitted activity is the minimum lifecycle/protocol activity required to acknowledge or complete retirement if the runtime requires it.
+
+The Manager/runtime MUST treat `(cloning)` as unavailable when routing work or communication. Messages or work addressed to that instance should fail closed or be re-routed to Manager until the replacement is registered.
+
+The lock begins **after the handoff packet has been obtained**. This matters because the old agent must be able to provide its final context before becoming inaccessible.
+
+Once `(cloning)` is set, the state is not cancelled by ordinary agent requests. The expected terminal transition is retirement/archive after the replacement has been established.
+
+Conceptually:
+
+`ACTIVE -> STOPPED/HANDOFF -> (cloning) LOCKED -> RETIRED`
+
+and separately:
+
+`handoff -> NEW INSTANCE -> roster trusted -> ACTIVE`
+
+This prevents a race where the old instance continues working after its knowledge has already been copied into the replacement.
 
 ## Staffing and roster security
 
