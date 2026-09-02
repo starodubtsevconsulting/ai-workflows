@@ -24,25 +24,29 @@ flowchart TD
 | **Flow** | Bounded process/phase inside a workflow. | Implementation, Testing, Review, Release |
 | **Role** | Reusable organizational/behavioral contract. In informal/runtime language, **agent type** may be used as a synonym. | Worker, Manager, Judge, Strategist, Admin |
 | **Agent** | Concrete workflow participant fulfilling a Role, with workflow-specific name/configuration and runtime instances. | Coder fulfills Worker |
-| **Agent name / identity** | Concrete name/runtime identity of an Agent. | `Coder`, `Coder 1` |
+| **Agent name / identity** | Concrete name/runtime identity of an Agent. | `Coder`, `Coder (1)` |
 | **Team** | Workflow-specific participants plus collaboration/security/authorization policy. | Software Development Team |
 | **Team Template** | Reusable organizational/authority pattern expressed in Roles and inherited by workflows. | `standard` |
-| **Runtime roster** | Current mapping of active Agents/instances to runtime identities and lifecycle state. | Coder 1 active; Coder 0 archived |
-| **Knowledge transfer** | Deliberate transfer of task-relevant working knowledge from an outgoing Agent to its replacement before that knowledge is lost to context exhaustion. | decisions, current state, blockers, next action |
+| **Runtime roster** | Current mapping of active Agents/instances to runtime identities and lifecycle state. | Coder (2) active; Coder (1) archived |
+| **Contextual knowledge / context** | Working information currently carried by an Agent's active context: objective, decisions, progress, evidence, blockers, assumptions and next action. This is distinct from persistent memory/knowledge. | Coder's current implementation context |
+| **Context transfer** | Deliberate transfer of task-relevant contextual knowledge from an outgoing Agent to its replacement before context exhaustion. | Coder (1) → Coder (2) |
+| **Context recovery** | Best-effort reconstruction of contextual knowledge after direct context transfer is unavailable or incomplete. | supervisor + tracker + artifacts |
 | **Source / Project** | Concrete subject/context a workflow operates on. Project is a common Software Development source type. | Repository/project A |
 | **[Profile](https://github.com/starodubtsevconsulting/ai-profile)** | External personal/organization configuration that activates workflows and supplies runtime/project/provider policy. | [AI Profile repository](https://github.com/starodubtsevconsulting/ai-profile) |
 | **[Command](https://github.com/starodubtsevconsulting/ai-commands)** | Reusable bounded executable AI capability that Agents may invoke when authorized. | [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands) |
+
+`Contextual knowledge` is intentionally used when clarity is useful for readers unfamiliar with LLM terminology. In shorter technical descriptions, `context` means the same working information. `Memory` remains reserved for information intentionally persisted beyond the current Agent context/session.
 
 ### Role → Agent
 
 ```mermaid
 flowchart TD
   Role["Role: Worker"] --> Agent["Agent: Coder"]
-  Agent --> Runtime["Runtime instance: Coder 1"]
+  Agent --> Runtime["Runtime instance: Coder (1)"]
   Runtime --> Config["Context + model + permissions + lifecycle state"]
 ```
 
-A **Worker** is a reusable Role. **Coder** is a Software Development Agent fulfilling that Role. `Coder 1` may be the current runtime identity/instance of that Agent.
+A **Worker** is a reusable Role. **Coder** is a Software Development Agent fulfilling that Role. `Coder (1)` may be the current runtime identity/instance of that Agent.
 
 ## Standard roles
 
@@ -94,11 +98,11 @@ flowchart TD
 
 The workflow owns the team. Individual flows coordinate whichever subset of that team is needed. An Agent may participate in multiple flows.
 
-## Lifecycle, knowledge transfer and cloning
+## Lifecycle, context transfer and cloning
 
 Agents are replaceable runtime instances. Roles and responsibilities survive individual runtime instances.
 
-The preferred lifecycle is **proactive cloning**. The goal is not merely to replace an exhausted Agent; it is to replace the Agent **before exhaustion so its working knowledge can be transferred reliably**.
+The preferred lifecycle is **proactive cloning**. The goal is to replace the Agent before exhaustion so its **contextual knowledge** can be transferred reliably.
 
 With the standard two-signal clone policy, proactive replacement starts when both configured conditions are true:
 
@@ -108,28 +112,24 @@ With the standard two-signal clone policy, proactive replacement starts when bot
 
 `context utilization/pressure >= configured threshold`
 
-Then:
-
 ```mermaid
 flowchart TD
   A["Clone conditions reached"] --> B["Stop outgoing Agent"]
-  B --> C["Knowledge transfer"]
+  B --> C["Context transfer"]
   C --> D["Outgoing Agent: (cloning) LOCKED"]
   D --> E["Create replacement"]
-  E --> F["Pass knowledge to replacement"]
-  F --> G["Replacement acknowledges knowledge"]
+  E --> F["Pass contextual knowledge to replacement"]
+  F --> G["Replacement acknowledges context"]
   G --> H["Validate + update roster/team"]
   H --> I["Replacement ACTIVE"]
   I --> J["Outgoing Agent ARCHIVED"]
 ```
 
-Knowledge transfer normally includes the current objective, decisions, completed work, current state, evidence, blockers, assumptions and next action. It is intentionally task-relevant rather than a raw transcript dump.
+Context transfer normally includes the current objective, decisions, completed work, current state, evidence, blockers, assumptions and next action. It is task-relevant rather than a raw transcript dump.
 
-If proactive cloning is missed and the old Agent has already exhausted/lost its useful context, the system enters **recovery cloning**. The replacement can still be created, but normal knowledge transfer can no longer be trusted. Context must instead be reconstructed from whatever external evidence remains. This is a degraded/emergency path with weaker continuity guarantees.
+If proactive cloning is missed and the old Agent has exhausted/lost useful context, the system enters **recovery cloning**. Direct context transfer can no longer be trusted, so contextual knowledge is reconstructed from authorized evidence such as a supervisor/coordinating Agent, work tracker, session storage, durable memory or work artifacts.
 
-The normative lifecycle, recovery behavior and detailed vertical diagram live in [`role.spec.md`](role.spec.md).
-
-Lifecycle/control authorization is distinct from ordinary Agent communication. For example, a Manager may be allowed to send Judge an authorized clone signal while remaining forbidden from ordinary conversation with Judge.
+The normative lifecycle and recovery behavior live in [`role.spec.md`](role.spec.md) and [`workflow.spec.md`](workflow.spec.md).
 
 ## Repository structure
 
@@ -154,9 +154,7 @@ ai-workflows/
 
 ## Governance
 
-Judge provides workflow-scoped governance. Its cheap scheduled monitoring is intentionally bounded sampling rather than continuous full-history review. Human may explicitly request deeper historical audits when additional assurance is worth the context/token cost.
-
-Judge also provides narrow lifecycle governance gates such as candidate-Agent initialization validation. These control-plane interactions do not create general conversational permission between Agents and Judge.
+Judge provides workflow-scoped governance. Its scheduled monitoring is intentionally bounded sampling rather than continuous full-history review. Human may explicitly request deeper historical audits.
 
 ## Concrete workflows
 
@@ -166,15 +164,15 @@ Judge also provides narrow lifecycle governance gates such as candidate-Agent in
 
 ## Common agent/runtime contract
 
-[`role.spec.md`](role.spec.md) defines the common Role-to-Agent instantiation, knowledge-transfer and lifecycle contract. [`workflow.spec.md`](workflow.spec.md) defines how workflows supply concrete bindings while avoiding duplication of role-level normative rules.
+[`role.spec.md`](role.spec.md) defines the common Role-to-Agent instantiation, context-transfer and lifecycle contract. [`workflow.spec.md`](workflow.spec.md) defines workflow recovery sources and concrete bindings.
 
 ## Relationship to AI Commands
 
-Workflows coordinate work. Commands describe reusable executable capabilities that workflows may select. The public command catalog is available in the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
+Workflows coordinate work. Commands describe reusable executable capabilities that workflows may select. See the [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands).
 
 ## Relationship to AI Profile
 
-Profiles are intentionally outside this repository. The separate [AI Profile repository](https://github.com/starodubtsevconsulting/ai-profile) shows how personal/organization-specific configuration can activate workflows, bind projects and supply runtime/provider policy.
+Profiles are intentionally outside this repository. See the [AI Profile repository](https://github.com/starodubtsevconsulting/ai-profile).
 
 ## Publication boundary
 
