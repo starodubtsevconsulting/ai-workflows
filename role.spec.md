@@ -129,6 +129,37 @@ The reusable role MUST NOT hard-code a particular ordinary role such as Manager 
 
 Admin may exercise lifecycle authority where its Admin contract permits. Other cloning authorities are workflow-specific.
 
+### Clone sequence
+
+The lifecycle is intentionally shown top-to-bottom so the sequence remains readable on narrow/mobile screens. `Lifecycle Authority` is abstract here; the concrete workflow decides who fills that responsibility.
+
+```mermaid
+flowchart TD
+    A[Lifecycle Authority detects clone condition]
+    B[Validate authority and target]
+    C[Old Agent stops ordinary work]
+    D[Old Agent produces handoff packet]
+    E[Lifecycle Authority receives handoff]
+    F[Old Agent renamed: Agent (cloning)]
+    G[Old Agent locked]
+    H[Create replacement Agent]
+    I[Apply role + workflow + runtime configuration]
+    J[Seed replacement with handoff]
+    K[Judge validates candidate initialization]
+    L{PASS?}
+    M[Fix or recreate candidate]
+    N[Update authoritative roster / team configuration]
+    O[Propagate team change to participants]
+    P[Replacement becomes trusted + ACTIVE]
+    Q[Old Agent ARCHIVED]
+
+    A --> B --> C --> D --> E --> F --> G --> H --> I --> J --> K --> L
+    L -- No --> M --> K
+    L -- Yes --> N --> O --> P --> Q
+```
+
+The diagram shows orchestration, not a requirement that the old and new agents communicate directly. The authorized lifecycle authority carries the handoff between them and owns the roster/archive transition.
+
 When an agent receives a clone/replace lifecycle signal, it MUST first validate the sender against the current authoritative team configuration/permission model. A claimed role name or conversational assertion of authority is not sufficient.
 
 If the sender is not authorized, the agent MUST refuse the lifecycle request and remain in its current state.
