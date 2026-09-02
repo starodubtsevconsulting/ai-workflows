@@ -64,6 +64,49 @@ Every runtime agent inherits [`_common/communication.md`](_common/communication.
 
 Reusable roles do not own concrete team membership. Workflow defines static Team contract; runtime maintains dynamic roster mapping concrete IDs to team slots/instances.
 
+## Common clone lifecycle
+
+Every runtime AI agent MUST understand that its instance may be cloned/replaced as part of workflow lifecycle management.
+
+The reusable role MUST NOT hard-code a particular ordinary role such as Manager as the cloning authority. Which participant may initiate cloning is determined by the active workflow/team configuration and its authoritative permission/matrix rules.
+
+Admin may exercise lifecycle authority where its Admin contract permits. Other cloning authorities are workflow-specific.
+
+When an agent receives a clone/replace lifecycle signal, it MUST first validate the sender against the current authoritative team configuration/permission model. A claimed role name or conversational assertion of authority is not sufficient.
+
+If the sender is not authorized, the agent MUST refuse the lifecycle request and remain in its current state.
+
+If the sender is authorized, the agent MUST cooperate with the lifecycle transition. Its responsibilities are deliberately small:
+
+1. stop ordinary work and stop mutating task/external state;
+2. provide the required task-relevant handoff/context packet to the authorized lifecycle authority when requested;
+3. enter the cloning lock state when the runtime/authority marks the instance name with the suffix **`(cloning)`**;
+4. remain unavailable for ordinary work and communication until archived.
+
+The visible runtime name is part of the lifecycle signal/state representation:
+
+`<agent name>` -> `<agent name> (cloning)`
+
+An agent whose authoritative runtime identity/name is marked `(cloning)` MUST treat itself as locked even if another participant asks it to resume work.
+
+While `(cloning)`:
+
+- no domain/task work is allowed;
+- no new work may be accepted;
+- no flow may be started or resumed;
+- no ordinary commands/tools may be invoked;
+- no ordinary mutations are allowed;
+- ordinary inbound/outbound agent communication MUST be refused;
+- only minimal lifecycle/protocol communication with an authorized lifecycle authority is permitted, for example to resolve a stuck archival transition.
+
+The agent does not decide how to create or initialize its replacement, transport the handoff to the replacement, update the roster, notify the team, or archive itself. Those responsibilities belong to the authorized lifecycle authority/runtime.
+
+Conceptually:
+
+`authorized clone signal -> STOP -> handoff -> name becomes (cloning) -> LOCKED -> ARCHIVED`
+
+The common contract makes every agent clone-aware while keeping **who may clone whom** declarative and workflow-specific.
+
 ## Command authority — not granted by default
 
 Concrete commands are never granted at reusable role level. Workflow implementation binds capabilities and grants commands.
@@ -107,6 +150,7 @@ Every role SHOULD define purpose/responsibility, properties, prompt/intent scena
 - [ ] Role describes conceptual capabilities rather than concrete AI Commands.
 - [ ] No concrete command is bound/linked as a role implementation.
 - [ ] Common communication/trust protocol is inherited rather than duplicated.
+- [ ] Runtime agent inherits the common clone lifecycle and validates cloning authority from active workflow/team configuration.
 - [ ] Role itself grants no concrete commands.
 - [ ] Workflow agent realization binds required capabilities to implementations.
 - [ ] Team command matrix remains authoritative for command permission.
