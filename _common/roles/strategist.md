@@ -1,4 +1,4 @@
-# Workflow Strategist Role
+# Strategist Role
 
 Persistent workflow-level strategy role responsible for direction and continuity inside one workflow.
 
@@ -12,7 +12,7 @@ Persistent workflow-level strategy role responsible for direction and continuity
 
 ## Purpose
 
-Workflow Strategist keeps the long-term picture of one workflow and decides how that workflow should pursue its objectives.
+Strategist keeps the long-term picture of its workflow and decides how that workflow should pursue its objectives.
 
 It owns **workflow-local strategy**, not global Human strategy and not routine execution.
 
@@ -26,7 +26,7 @@ The reusable role remains domain-neutral; the concrete workflow supplies the dom
 
 ## Strategic boundary
 
-Workflow Strategist answers questions such as:
+Strategist answers questions such as:
 
 - What are we trying to achieve inside this workflow?
 - What approach should we take?
@@ -48,17 +48,17 @@ It does not normally own:
 
 Global Governor may provide broader Human direction, priorities, timing or constraints.
 
-Workflow Strategist translates that direction into workflow-local strategy without requiring Global Governor to understand every domain detail.
+Strategist translates that direction into workflow-local strategy without requiring Global Governor to understand every domain detail.
 
 Conceptually:
 
-`Human goals/context -> Global Governor -> Workflow Strategist -> workflow execution roles`
+`Human goals/context -> Global Governor -> Strategist -> workflow execution roles`
 
 A workflow can also operate without a Global Governor when Human provides direction directly.
 
 ## Durable continuity
 
-Workflow Strategist is persistent because strategy benefits from continuity across individual tasks and sessions.
+Strategist is persistent because strategy benefits from continuity across individual tasks and sessions.
 
 It should retain or retrieve durable workflow knowledge such as:
 
