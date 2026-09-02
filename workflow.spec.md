@@ -54,29 +54,9 @@ Every workflow owns static Team definition under `team/`. Team defines collabora
 
 Keep active population as small as practical. Prefer recoverable archival/deactivation over destructive deletion. Multiple instances of one role are allowed when justified.
 
-Every configured runtime AI agent MUST declare a clone policy. An agent without a clone policy is considered **incompletely initialized** and MUST NOT enter normal active workflow operation.
+Every workflow-local agent realization MUST satisfy the complete Agent instantiation contract defined by [`role.spec.md`](role.spec.md) before it is considered READY. This includes the required harness-neutral clone policy and its primary/fallback context-health thresholds.
 
-Clone policy is harness-neutral. Runtime/harness adapters expose the best context-health signals they support.
-
-Signal precedence:
-
-1. if a reliable context-compaction count/equivalent is available, use the configured compaction threshold;
-2. otherwise, if reliable context utilization/pressure is available, use the configured utilization threshold;
-3. otherwise, automatic context-health cloning is unavailable and lifecycle authority must not invent a signal.
-
-The configuration describes policy rather than a specific harness API. A harness may expose compactions, remaining context, token utilization, context pressure, or an equivalent normalized signal.
-
-Recommended representation in `agents.md` is explicit columns for the primary and fallback thresholds:
-
-| Agent | Clone after compactions | Clone at context utilization | ... |
-| --- | ---: | ---: | --- |
-| Example Worker | 1 | 75% | ... |
-
-`Clone after compactions` means clone when the observed count is greater than or equal to the configured value. `Clone at context utilization` is the fallback when the primary compaction/equivalent signal is unavailable.
-
-A workflow/profile/runtime MAY override thresholds explicitly for a concrete deployment, but omission is not a valid active-agent configuration.
-
-The common behavioral response to an authorized cloning signal is inherited from [`role.spec.md`](role.spec.md).
+`workflow.spec.md` does not redefine that contract. Its responsibility is to require each workflow's `agents.md` to supply the concrete values/bindings needed to satisfy it.
 
 ## Staffing authorities
 
@@ -95,6 +75,8 @@ Every workflow MUST contain `README.md`, `workflow.md`, `agents.md`, and `team/`
 Defines workflow-local realizations of reusable roles and concrete implementation bindings for their conceptual capabilities.
 
 ### Agent properties
+
+The columns below include workflow-local values required by the Agent instantiation contract. Their semantics, validation and clone-signal precedence are normative in [`role.spec.md`](role.spec.md).
 
 | Agent | Role | Human-facing override | Intelligence | Reasoning | Context | Memory | Lifecycle | Clone after compactions | Clone at context utilization | Scheduled | Schedule intent | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
@@ -174,8 +156,8 @@ Runtime/profile resolves active source/project and maps requirements/bindings to
 - [ ] source/project resolution defined;
 - [ ] roles contain conceptual capabilities, not concrete command bindings;
 - [ ] `agents.md` contains capability implementation bindings table;
-- [ ] every active agent declares clone-after-compactions and fallback context-utilization thresholds;
-- [ ] agents without clone policy are treated as incompletely initialized;
+- [ ] every workflow agent satisfies the Agent instantiation contract from `role.spec.md` before READY;
+- [ ] `agents.md` supplies required clone-policy thresholds rather than redefining their semantics;
 - [ ] concrete command bindings are authorized separately by command matrix;
 - [ ] static Team policy separate from runtime roster;
 - [ ] every agent declares scheduled yes/no;
