@@ -17,123 +17,103 @@ Bounded dynamic execution/routing Worker for registered AI Commands delegated by
 
 Command Runner translates bounded caller intent into authorized command invocation, executes it, waits/observes when needed, and returns a compact useful result.
 
-`caller intent -> Command Runner -> resolve command -> authorize -> execute -> bounded report`
-
-Because the work is normally mechanical, Command Runner SHOULD use a cheap/low-intelligence model (for example a configured Luna-class local model) unless a concrete command requires otherwise.
+Because the work is normally mechanical, Command Runner SHOULD use a cheap/low-intelligence model unless a concrete command requires otherwise.
 
 ## Ready-first Runner pool
 
-A workflow normally keeps **one ready Command Runner** so the first caller does not pay Agent startup latency.
+A workflow normally keeps one ready Command Runner so the first caller does not pay Agent startup latency.
 
-When idle, its visible name is simply:
+Idle/ready:
 
 `Command Runner`
 
-No parentheses are shown while it is available.
+Busy assignment:
 
-When it accepts a command, it is temporarily renamed to expose its current assignment:
+`Command Runner [deploy]`
 
-`Command Runner (deploy)`
+`Command Runner [logs]`
 
-`Command Runner (logs)`
+`Command Runner [source-control]`
 
-`Command Runner (source-control)`
-
-The assignment label is operational/observable state, not a new Role, Agent type, or replacement generation.
+Square brackets are reserved for **current assignment labels**. When the Runner becomes ready/idle again, the assignment label is removed.
 
 ### Keep one ready
 
-The intended invariant is:
-
 `ready Command Runner count >= 1`
 
-When the ready Runner accepts work and becomes busy, lifecycle/staffing authority MAY immediately create another plain `Command Runner` so another caller can be served without waiting for the busy Runner to finish.
-
-Example:
+When the ready Runner accepts work, lifecycle/staffing authority may create another plain `Command Runner` to preserve ready capacity.
 
 ```text
 Command Runner                     # ready
 
 request: deploy
 
-Command Runner (deploy)            # busy
-Command Runner                     # new ready Runner
+Command Runner [deploy]            # busy
+Command Runner                     # ready
 
 request: logs
 
-Command Runner (deploy)            # busy
-Command Runner (logs)              # busy
-Command Runner                     # new ready Runner
+Command Runner [deploy]            # busy
+Command Runner [logs]              # busy
+Command Runner                     # ready
 ```
 
-This behaves like a small elastic pool with a **minimum idle/ready capacity of one**. It does not require a fixed maximum pool size at the common Role level; workflow/runtime policy may impose one.
+This is an Elastic Agent Pool with minimum ready capacity `1`.
 
 ### Completion
 
-A temporary/busy Runner created as part of elastic capacity is normally archived/destroyed after its bounded assignment completes, while one plain ready `Command Runner` remains available.
+After an assignment completes, excess Runner capacity may be archived/destroyed or one completed Runner may be safely reset and reused as the ready `Command Runner`.
 
-The runtime MAY reuse a completed Runner as the single ready instance when that is cheaper than destroying it and keeping another one, provided its task context is safely cleared/reset and authorization/runtime state remains valid.
+`Command Runner [deploy] -> Command Runner`
 
-The goal is the invariant, not a particular process identity:
+when that instance is selected for reuse.
 
-`after work settles -> one ready Command Runner`
+## Naming convention
 
-### Assignment label vs generation
+Agent display naming follows the common convention:
 
-Parentheses have two different lifecycle uses and MUST remain distinguishable by content:
+`Name (generation) [assignment] (lifecycle marker)`
 
-`Command Runner (deploy)` = current assignment label
+Semantics:
 
-`Coder (3)` = replacement generation
+- `(number)` = replacement generation;
+- `[text]` = current elastic-pool/work assignment;
+- `(cloning)` = outgoing replacement lifecycle marker.
 
-If a long-lived Command Runner lineage itself undergoes replacement cloning, generation/state representation must remain unambiguous in runtime metadata. The assignment label is never interpreted as a generation number.
+Examples:
 
-Temporary elastic copies are **horizontal capacity**, not replacement cloning. They do not increment another Runner's clone generation merely because they were spawned.
+`Coder (3) [feature-A]`
+
+`Coder (3) [feature-A] (cloning)`
+
+`Coder (4) [feature-A]`
+
+`Command Runner [deploy]`
+
+Assignment labels and generation are independent runtime metadata and MUST NOT be conflated.
+
+Temporary elastic copies are horizontal capacity, not replacement cloning.
 
 ## Not a mandatory proxy
 
 Command Runner is not required between every Agent and every AI Command. When an Agent naturally owns a bounded command and workflow explicitly grants direct access, it may call that command directly.
 
-## Responsibility fallback
-
-Prefer a dedicated responsible Agent when one exists and communication is allowed. Otherwise Command Runner may provide bounded dynamic execution.
-
-Frequent use for the same intent is an architectural signal, but it does not automatically require a dedicated Agent; elastic Runner capacity may be the correct solution.
-
-## Intent-to-command routing
-
-Callers may ask in task language rather than naming commands. Runner uses workflow/team routing plus registered Command intent mappings. If command or required context cannot be determined safely, report `BLOCKED` rather than guessing.
-
 ## Authorization
 
-Before execution verify caller identity/context, caller -> Runner communication permission, caller permission for resolved command, and command/runtime authorization.
+Before execution verify caller identity/context, communication permission, caller permission for resolved command and runtime authorization. Command Runner never lends its own authority to the caller.
 
-**Command Runner never lends its own authority to the caller.**
-
-## Command composition
-
-Select a top-level command; do not invent arbitrary chains. Nested delegation follows selected command's explicit policy.
-
-## Retry behavior
-
-May retry transient failures when reasonably safe. Do not blindly retry destructive/non-idempotent operations.
-
-## Output protection and result policy
-
-Protect caller context:
+## Output protection
 
 `command raw output -> preserve/reference if required -> filter/bound/summarize -> compact report -> caller`
 
 ## Communication
 
-Follows [`../communication.md`](../communication.md), including receiver-side authorization and `COPY -> REPORT BACK`.
+Follows [`../communication.md`](../communication.md).
 
 ## Boundaries
 
 - Not human-facing.
-- Not a mandatory proxy for direct authorized commands.
 - Does not own product/design/workflow strategy.
 - Does not broaden caller permissions.
-- Does not guess missing high-risk context.
 - Does not maintain durable memory by default.
 - Busy/temporary Runners receive only contextual knowledge and bindings needed for their bounded assignment.
