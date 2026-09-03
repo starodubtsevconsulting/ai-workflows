@@ -6,7 +6,7 @@ This document defines the common contract for reusable Roles and their Agent rea
 
 Every reusable Role definition MUST contain Properties with at least `level`, `human-facing`, `interaction-mode`, `memory-class`, and `lifecycle`.
 
-A Role MAY provide a default for `elastic-pool-enabled`, but the concrete Agent realization MUST resolve the final value during instantiation.
+A Role MAY provide defaults for Agent runtime requirements such as Elastic Agent Pool or Harness Context Policy, but the concrete Agent realization/runtime MUST resolve final values during instantiation.
 
 ## Agent instantiation contract
 
@@ -19,60 +19,91 @@ Every runtime AI Agent MUST resolve, at minimum:
 - memory/lifecycle/scheduling configuration;
 - capability bindings and Team authorization;
 - clone policy: `clone-after-compactions`, `clone-at-context-utilization`;
-- Elastic Agent Pool policy: `elastic-pool-enabled`.
-
-When `elastic-pool-enabled: true`, the Agent configuration MAY additionally define:
-
-- `elastic-pool-min-ready` — minimum idle/ready capacity to preserve;
-- `elastic-pool-max` — optional maximum concurrent pool size;
-- pool assignment naming/observability policy;
-- completion policy such as reuse/reset vs archive/destroy excess capacity.
-
-When `elastic-pool-enabled: false`, runtime MUST NOT horizontally create additional copies of that Agent merely for concurrency. Replacement cloning remains separately available according to lifecycle policy.
+- Elastic Agent Pool policy: `elastic-pool-enabled`;
+- **Harness Context Policy**.
 
 An Agent with unresolved required instantiation parameters is **NOT READY**.
+
+## Harness Context Policy
+
+Harness Context Policy defines **requirements imposed on the AI harness/runtime that hosts an Agent** to control context usage, exposure, efficiency and observability.
+
+It is explicitly harness-related configuration. The Agent declares/requires the policy; the harness/runtime adapter applies it using mechanisms available in the active harness.
+
+Conceptually:
+
+`Agent configuration -> Harness Context Policy -> harness/runtime adapter -> Codex / Claude Code / Hermes / Pi / other harness`
+
+The common policy is harness-neutral. It MUST NOT assume Claude-specific, Codex-specific or other provider-specific configuration names.
+
+### Common policy fields
+
+A concrete Agent SHOULD resolve applicable values such as:
+
+- `tool-output-policy` — normally `bounded`; avoid injecting unnecessarily large raw tool output into Agent context;
+- `unused-tools` — normally `disabled` where the harness supports selective tool exposure;
+- `unused-mcp` — normally `disabled` where MCP/tool-server exposure is configurable;
+- `model-switching` — normally `avoid` within a running Agent context unless explicitly required;
+- `context-monitoring` — normally `enabled` when harness telemetry is available;
+- `cache-awareness` — `enabled` when the harness exposes meaningful prompt/context-cache behavior;
+- `instruction-budget` — optional configured budget/limit for automatically loaded instruction/context material;
+- `scheduled-work-cache-awareness` — enabled when scheduled/background Agent execution and harness caching interact.
+
+Workflow/profile may specialize these values for a concrete Agent.
+
+### Harness application
+
+The harness/runtime adapter translates common policy intent into harness-specific mechanisms.
+
+Examples may include instruction-file loading behavior, MCP/tool exposure, hooks/output filtering, model/effort configuration, cache telemetry, context/compaction telemetry or scheduled-task configuration. Those implementation details belong to the harness/runtime adapter, not to reusable workflow/Role definitions.
+
+If a requested policy dimension cannot be observed or enforced by the active harness, runtime MUST report it as `UNSUPPORTED` or `UNKNOWN` rather than pretending it is enforced.
+
+### Readiness and validation
+
+Before Agent READY, runtime MUST resolve each required Harness Context Policy dimension into one of:
+
+`ENFORCED | UNSUPPORTED | UNKNOWN | explicitly accepted exception`
+
+A workflow/profile may define which unsupported/unknown dimensions block readiness. Judge/runtime validation may compare declared policy with observed harness configuration.
+
+Harness Context Policy is preventative configuration. A separate runtime audit may measure actual context/token/cache/tool behavior and report drift or waste without modifying configuration.
 
 ## Elastic Agent Pool
 
 Elastic Agent Pool is a horizontal capacity mechanism available to any Agent whose resolved configuration enables it.
 
-`elastic-pool-enabled: true` means lifecycle/staffing authority may create additional concurrent instances for independent/bounded work according to workflow/runtime policy.
+When enabled, configuration MAY define `elastic-pool-min-ready`, `elastic-pool-max`, assignment observability and completion/reuse policy.
 
-It does **not** mean the runtime must always maintain multiple instances.
+Pool copies are horizontal siblings, not replacement generations. Work MUST be safely partitioned.
 
 Examples:
 
 `Command Runner: enabled, min-ready = 1`
 
-`Coder: enabled, min-ready = 0` — additional Coders may be created on demand for safely independent work.
-
-`Judge: disabled` — governance remains a single logical participant unless explicitly redesigned.
-
-Pool copies are horizontal siblings, not replacement generations. Their work MUST be safely partitioned so concurrent instances do not unknowingly own/mutate the same responsibility.
+`Coder: enabled, min-ready = 0`
 
 ## Replacement cloning
 
 Cloning is distinct from Elastic Agent Pool:
 
-`Cloning = Agent (N) -> Agent (N+1)` — replace one existing lineage while preserving contextual continuity.
+`Cloning = Agent (N) -> Agent (N+1)` — continuity/replacement.
 
-`Elastic Pool = Agent A + Agent B + ...` — add concurrent capacity while existing instances remain active.
+`Elastic Pool = Agent A + Agent B + ...` — concurrent capacity.
 
-Each configured Agent has a stable base name and replacement generations use monotonically increasing numeric generation metadata. `(cloning)` is applied only to the outgoing generation during replacement.
+When both configured context-health signals are available, proactive cloning requires compaction/equivalent threshold **AND** context-utilization/pressure threshold. Context transfer occurs before outgoing lock when reliable context remains; recovery cloning reconstructs contextual knowledge when proactive transfer was missed.
 
-When both configured context-health signals are available, proactive cloning requires:
+## Runtime naming
 
-`compaction/equivalent count >= clone-after-compactions`
+Common display convention:
 
-**AND**
+`Name (generation) [assignment] (lifecycle marker)`
 
-`context utilization/pressure >= clone-at-context-utilization`
-
-Context transfer must occur before the outgoing instance is locked whenever reliable context remains. Recovery cloning reconstructs contextual knowledge from available workflow evidence when proactive transfer was missed.
+`(number)` = replacement generation; `[text]` = current assignment; `(cloning)` = outgoing replacement state.
 
 ## Initialization validation
 
-Candidate configuration MUST be validated against applicable Role, Workflow and Team rules before READY. This includes resolved Elastic Agent Pool policy.
+Candidate configuration MUST be validated against applicable Role, Workflow and Team rules before READY, including clone policy, Elastic Agent Pool policy and Harness Context Policy resolution.
 
 ## Role capabilities versus concrete commands
 
@@ -82,36 +113,29 @@ Reusable Roles describe conceptual capabilities, never concrete AI Command depen
 
 ## Communication and trust
 
-Every runtime Agent inherits [`_common/communication.md`](_common/communication.md). Pool copies and clone replacements receive distinct runtime identities and must enter the authoritative roster before normal trusted communication.
+Every runtime Agent inherits [`_common/communication.md`](_common/communication.md). Runtime identities must enter authoritative roster before normal trusted communication.
 
 ## Team/runtime separation
 
-Workflow defines static Team contract; runtime maintains dynamic roster, pool membership, assignments, generations and lifecycle state.
+Workflow defines static Team contract; runtime maintains dynamic roster, pool membership, assignments, generations, lifecycle state and harness-policy enforcement state.
 
 ## Contextual knowledge
 
-Contextual knowledge is task-relevant working information held in active Agent context. Proactive replacement transfers it directly to the successor. Recovery reconstructs it from authorized evidence when direct transfer is unavailable.
-
-## Command authority
-
-Concrete commands are never granted at reusable Role level. Workflow implementation binds capabilities and Team policy grants authorization.
-
-## Human participant
-
-Human is not an AI Agent but MUST be represented in workflow Team interaction modeling when applicable.
+Contextual knowledge is task-relevant working information held in active Agent context. It is distinct from persistent memory.
 
 ## Override rule
 
-Reusable Role properties are defaults. Workflow/profile specialization may override explicitly but SHOULD NOT silently broaden authority, privacy access, command permissions, memory scope or pool capacity.
+Reusable Role properties are defaults. Workflow/profile specialization may override explicitly but SHOULD NOT silently broaden authority, privacy access, command permissions, memory scope, pool capacity or harness context exposure.
 
 ## Acceptance checklist
 
 - [ ] Required Role properties declared.
-- [ ] Agent resolves `elastic-pool-enabled` before READY.
-- [ ] Enabled pool policy supplies any workflow-required capacity limits/defaults.
-- [ ] Pool copies are used only for safely partitioned concurrent work.
+- [ ] Agent resolves clone policy.
+- [ ] Agent resolves `elastic-pool-enabled`.
+- [ ] Agent resolves Harness Context Policy before READY.
+- [ ] Harness-specific implementation remains outside reusable workflow/Role definitions.
+- [ ] Unsupported/unknown harness policy dimensions are reported rather than guessed.
 - [ ] Elastic scaling is not confused with replacement cloning.
-- [ ] Clone-policy thresholds resolved.
 - [ ] Context transfer/recovery lifecycle supported.
 - [ ] Initialization validated before activation.
 - [ ] Team authorization remains authoritative.
