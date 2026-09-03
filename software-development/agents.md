@@ -12,13 +12,10 @@ Software Development uses [`standard`](../_common/team-templates/standard/README
 | Judge | `Judge` |
 | Designer Reviewer | `Worker` |
 | Coder | `Worker` |
-| Deployer | `Worker` |
 | Manager | `Manager` |
 | Command Runner | `Worker` |
 | UI Acceptance Tester | `Worker` |
 | Admin (when present) | `Admin` |
-
-`Deployer` uses the reusable [`Deployer Agent definition`](../_common/roles/deployer.md) while fulfilling the common `Worker` Role.
 
 ## Agent properties
 
@@ -28,25 +25,27 @@ Software Development uses [`standard`](../_common/team-templates/standard/README
 | Judge | `Judge` | true | high | high | large | `SESSION` | ephemeral | 3 | 85% | yes | Periodically sample activity for rule compliance/authority abuse. | Scope is bound below. |
 | Designer Reviewer | `Worker` |  | high | high | large | `SESSION` | ephemeral | 3 | 80% | no | — | Design/architecture and implementation-conformance Worker. |
 | Coder | `Worker` |  | medium | medium | medium | `SESSION` | ephemeral | 1 | 75% | no | — | Bounded software implementation Worker. |
-| Deployer | `Worker` | false | low | low | small | `SESSION` | ephemeral | 2 | 75% | no | — | Mechanical deployment/pipeline execution; concrete provider/command is bound per workflow/runtime. |
 | Manager | `Manager` |  | medium | medium | medium | `SESSION` | ephemeral | 1 | 75% | yes | Periodically inspect tracked-work and Agent context/lifecycle state. | Lifecycle authority inherited from standard template. |
-| Command Runner | `Worker` |  | low | low | small | `SESSION` | ephemeral | 2 | 75% | no | — | Dynamic bounded capability-routing/execution Worker. |
+| Command Runner | `Worker` |  | low | low | small | `SESSION` | ephemeral | 2 | 75% | no | — | One normal instance for routine commands; temporary copies may be created for slow/long-running bounded operations. |
 | UI Acceptance Tester | `Worker` |  | medium | medium | medium | `PROJECT` | persistent | 2 | 80% | no | — | Project-specific UI acceptance Worker. |
 
-Proactive cloning uses configured context-health conditions according to [`role.spec.md`](../role.spec.md).
+## Command Runner concurrency
+
+Software Development normally keeps one Command Runner available for routine bounded command execution.
+
+When a command is expected to occupy the normal Runner for a material period, Manager/runtime may create a temporary Command Runner copy on demand, give it only the contextual knowledge and bindings required for that operation, and archive it after completion.
+
+Deployment/pipeline execution is the primary current example:
+
+`deployment requested -> temporary Command Runner -> source-control/deployment capability -> wait/report -> archive temporary Runner`
+
+This preserves availability of the normal Command Runner for unrelated operations such as logs or source-control queries.
+
+Temporary capacity is not replacement cloning. Replacement cloning increments the generation of an existing lineage; temporary copies are additional concurrent Workers created for bounded work.
 
 ## Agent lifecycle authority
 
-Common clone lifecycle is inherited from [`role.spec.md`](../role.spec.md). Role lifecycle authority is inherited from the `standard` Team Template. Software Development currently defines no lifecycle-authority override.
-
-## Judge authoritative governance scope
-
-| Scope | Authoritative root / resolution | Access meaning |
-| --- | --- | --- |
-| Workflow rules | `starodubtsevconsulting/ai-workflows` -> `software-development/` | Judge governs this workflow's concrete rules. |
-| Common inherited rules | `starodubtsevconsulting/ai-workflows` -> `_common/` plus repository-level specs inherited by this workflow | Judge governs common rules insofar as they apply here. |
-| Connected command rules | `starodubtsevconsulting/ai-commands` -> commands resolved from workflow bindings/policy | Judge validates commands connected to this workflow. |
-| Proposed command rules | `starodubtsevconsulting/ai-commands` -> command proposed for connection | Judge may validate before authorization. |
+Common clone lifecycle is inherited from [`role.spec.md`](../role.spec.md). Role lifecycle authority is inherited from the `standard` Team Template.
 
 ## Capability implementation bindings
 
@@ -60,15 +59,13 @@ Bindings do not grant permission; see `team/command-matrix.csv`.
 | Coder | source control | command | `source-control` | Normal implementation lifecycle capability. |
 | Coder | runtime diagnostics | command | `logs` | Routed according to Team policy. |
 | Coder | code/filesystem editing | harness | configured harness code/filesystem capability | Runtime/profile selects harness. |
-| Deployer | deployment/pipeline execution | runtime/command | configured deployment provider/capability | May resolve to GitHub, Bitbucket, GitLab, cloud pipeline or another authorized implementation. |
-| Deployer | deployment/pipeline observation | runtime/command | configured deployment provider/capability | Waits for and reports bounded deployment status/evidence. |
 | Manager | tracked-work/ticket management | command | `ticket-tracker` | Provider resolved from project/profile. |
 | Manager | Agent lifecycle/context health | runtime | harness/runtime Agent inspection + lifecycle controls | Context monitoring, cloning, roster transition and archival. |
 | Judge | governance source control | command | `source-control` | Applies Human-authored in-scope governance changes. |
-| Command Runner | dynamic bounded command execution | runtime | registered AI Command catalog + caller policy | Resolved command still requires authorization. |
+| Command Runner | dynamic bounded command execution | runtime | registered AI Command catalog + caller policy | Normal and temporary copies use same authorization model. |
+| Command Runner | deployment/pipeline execution | runtime/command | configured deployment provider/capability | Prefer temporary copy when execution/wait would monopolize normal Runner. |
 | UI Acceptance Tester | computer use / vision | command | `computer-use` | Harness/provider resolved at runtime. |
 | UI Acceptance Tester | UI automation | project | project-configured acceptance automation | Project decides implementation. |
-| UI Acceptance Tester | acceptance code/filesystem editing | harness | configured harness code/filesystem capability | Writes/repairs project tests/helpers. |
 
 ## Authorization reminder
 
