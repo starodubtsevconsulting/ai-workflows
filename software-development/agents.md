@@ -1,55 +1,52 @@
 # Software Development Agents
 
-Workflow-local Agent configuration. The selected Team Template provides reusable Roles/authority; this file names and configures concrete Agents that fulfill those Roles in Software Development. Team command matrix separately controls command authorization.
-
-## Team template
-
-Software Development uses [`standard`](../_common/team-templates/standard/README.md).
-
-| Agent name | Role |
-| --- | --- |
-| Strategist | `Strategist` |
-| Judge | `Judge` |
-| Designer Reviewer | `Worker` |
-| Coder | `Worker` |
-| Manager | `Manager` |
-| Command Runner | `Worker` |
-| UI Acceptance Tester | `Worker` |
-| Admin (when present) | `Admin` |
+Workflow-local Agent configuration. Software Development uses the [`standard`](../_common/team-templates/standard/README.md) Team Template.
 
 ## Agent properties
 
-| Agent | Role | Human-facing override | Intelligence | Reasoning | Context | Memory | Lifecycle | Clone after compactions | Clone at context utilization | Scheduled | Schedule intent | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
-| Strategist | `Strategist` |  | highest-available | high | large | `WORKFLOW_STRATEGIC` + external workflow memory | persistent | 3 | 85% | no | — | Owns Software Development HOW and durable domain continuity. |
-| Judge | `Judge` | true | high | high | large | `SESSION` | ephemeral | 3 | 85% | yes | Periodically sample activity for rule compliance/authority abuse. | Scope is bound below. |
-| Designer Reviewer | `Worker` |  | high | high | large | `SESSION` | ephemeral | 3 | 80% | no | — | Design/architecture and implementation-conformance Worker. |
-| Coder | `Worker` |  | medium | medium | medium | `SESSION` | ephemeral | 1 | 75% | no | — | Bounded software implementation Worker. |
-| Manager | `Manager` |  | medium | medium | medium | `SESSION` | ephemeral | 1 | 75% | yes | Periodically inspect tracked-work and Agent context/lifecycle state. | Lifecycle authority inherited from standard template. |
-| Command Runner | `Worker` |  | low | low | small | `SESSION` | ephemeral | 2 | 75% | no | — | One normal instance for routine commands; temporary copies may be created for slow/long-running bounded operations. |
-| UI Acceptance Tester | `Worker` |  | medium | medium | medium | `PROJECT` | persistent | 2 | 80% | no | — | Project-specific UI acceptance Worker. |
+| Agent | Role | Intelligence | Reasoning | Context | Memory | Lifecycle | Clone after compactions | Clone at context utilization | Elastic pool | Min ready | Scheduled | Notes |
+| --- | --- | --- | --- | --- | --- | --- | ---: | ---: | --- | ---: | --- | --- |
+| Strategist | `Strategist` | highest-available | high | large | `WORKFLOW_STRATEGIC` + external workflow memory | persistent | 3 | 85% | disabled | 0 | no | Single strategic continuity participant. |
+| Judge | `Judge` | high | high | large | `SESSION` | ephemeral | 3 | 85% | disabled | 0 | yes | Governance participant; not horizontally scaled by default. |
+| Designer Reviewer | `Worker` | high | high | large | `SESSION` | ephemeral | 3 | 80% | disabled | 0 | no | Design/architecture and implementation-conformance Worker. |
+| Coder | `Worker` | medium | medium | medium | `SESSION` | ephemeral | 1 | 75% | enabled | 0 | no | Additional Coders may be created on demand only for safely independent work. |
+| Manager | `Manager` | medium | medium | medium | `SESSION` | ephemeral | 1 | 75% | disabled | 0 | yes | Coordinates work, context lifecycle and staffing. |
+| Command Runner | `Worker` | low | low | small | `SESSION` | ephemeral | 2 | 75% | enabled | 1 | no | Elastic pool keeps one ready Runner; busy instances expose assignment such as `(deploy)` or `(logs)`. |
+| UI Acceptance Tester | `Worker` | medium | medium | medium | `PROJECT` | persistent | 2 | 80% | disabled | 0 | no | Project-specific UI acceptance Worker. |
 
-## Command Runner concurrency
+`Elastic pool` resolves the required `elastic-pool-enabled` Agent-instantiation property from [`role.spec.md`](../role.spec.md). `Min ready` is meaningful when pool is enabled.
 
-Software Development normally keeps one Command Runner available for routine bounded command execution.
+## Elastic capacity
 
-When a command is expected to occupy the normal Runner for a material period, Manager/runtime may create a temporary Command Runner copy on demand, give it only the contextual knowledge and bindings required for that operation, and archive it after completion.
+### Command Runner
 
-Deployment/pipeline execution is the primary current example:
+`elastic-pool-enabled: true`
 
-`deployment requested -> temporary Command Runner -> source-control/deployment capability -> wait/report -> archive temporary Runner`
+`elastic-pool-min-ready: 1`
 
-This preserves availability of the normal Command Runner for unrelated operations such as logs or source-control queries.
+One plain `Command Runner` remains ready. Busy Runners expose assignment labels. Additional capacity is created when required and excess capacity is reused/reset or archived after work settles.
 
-Temporary capacity is not replacement cloning. Replacement cloning increments the generation of an existing lineage; temporary copies are additional concurrent Workers created for bounded work.
+### Coder
+
+`elastic-pool-enabled: true`
+
+`elastic-pool-min-ready: 0`
+
+Coder is horizontally scalable, but additional instances are created only on demand because they are more expensive and carry richer context than Command Runner. Parallel Coder assignments MUST be safely independent/partitioned.
+
+Example:
+
+`Coder (feature-A)`
+
+`Coder (feature-B)`
+
+These are concurrent pool assignments, not replacement generations. Replacement cloning remains a separate lifecycle mechanism.
 
 ## Agent lifecycle authority
 
 Common clone lifecycle is inherited from [`role.spec.md`](../role.spec.md). Role lifecycle authority is inherited from the `standard` Team Template.
 
 ## Capability implementation bindings
-
-Bindings do not grant permission; see `team/command-matrix.csv`.
 
 | Agent | Role capability | Implementation type | Implementation | Notes |
 | --- | --- | --- | --- | --- |
@@ -60,10 +57,10 @@ Bindings do not grant permission; see `team/command-matrix.csv`.
 | Coder | runtime diagnostics | command | `logs` | Routed according to Team policy. |
 | Coder | code/filesystem editing | harness | configured harness code/filesystem capability | Runtime/profile selects harness. |
 | Manager | tracked-work/ticket management | command | `ticket-tracker` | Provider resolved from project/profile. |
-| Manager | Agent lifecycle/context health | runtime | harness/runtime Agent inspection + lifecycle controls | Context monitoring, cloning, roster transition and archival. |
+| Manager | Agent lifecycle/context health | runtime | harness/runtime Agent inspection + lifecycle controls | Context monitoring, cloning, pool staffing, roster transition and archival. |
 | Judge | governance source control | command | `source-control` | Applies Human-authored in-scope governance changes. |
-| Command Runner | dynamic bounded command execution | runtime | registered AI Command catalog + caller policy | Normal and temporary copies use same authorization model. |
-| Command Runner | deployment/pipeline execution | runtime/command | configured deployment provider/capability | Prefer temporary copy when execution/wait would monopolize normal Runner. |
+| Command Runner | dynamic bounded command execution | runtime | registered AI Command catalog + caller policy | All pool instances use same authorization model. |
+| Command Runner | deployment/pipeline execution | runtime/command | configured deployment provider/capability | Long-running deployment may occupy one pool instance while another remains ready. |
 | UI Acceptance Tester | computer use / vision | command | `computer-use` | Harness/provider resolved at runtime. |
 | UI Acceptance Tester | UI automation | project | project-configured acceptance automation | Project decides implementation. |
 
