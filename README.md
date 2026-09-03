@@ -28,25 +28,25 @@ flowchart TD
 | **Team** | Workflow-specific participants plus collaboration/security/authorization policy. | Software Development Team |
 | **Team Template** | Reusable organizational/authority pattern expressed in Roles and inherited by workflows. | `standard` |
 | **Runtime roster** | Current mapping of active Agents/instances to runtime identities and lifecycle state. | Coder (2) active; Coder (1) archived |
-| **Contextual knowledge / context** | Working information currently carried by an Agent's active context: objective, decisions, progress, evidence, blockers, assumptions and next action. This is distinct from persistent memory/knowledge. | Coder's current implementation context |
-| **Context transfer** | Deliberate transfer of task-relevant contextual knowledge from an outgoing Agent to its replacement before context exhaustion. | Coder (1) → Coder (2) |
-| **Context recovery** | Best-effort reconstruction of contextual knowledge after direct context transfer is unavailable or incomplete. | supervisor + tracker + artifacts |
-| **Source / Project** | Concrete subject/context a workflow operates on. Project is a common Software Development source type. | Repository/project A |
+| **Elastic Agent Pool** | Runtime capacity mechanism that keeps configured ready Agent capacity and horizontally adds temporary copies when existing instances become busy. It is scaling, not cloning. | Command Runner pool with minimum ready capacity `1` |
+| **Contextual knowledge / context** | Working information currently carried by an Agent's active context. Distinct from persistent memory/knowledge. | Coder's current implementation context |
+| **Context transfer** | Transfer of task-relevant contextual knowledge from an outgoing Agent to its replacement before exhaustion. | Coder (1) → Coder (2) |
+| **Context recovery** | Best-effort reconstruction of contextual knowledge after direct context transfer is unavailable/incomplete. | supervisor + tracker + artifacts |
+| **Source / Project** | Concrete subject/context a workflow operates on. | Repository/project A |
 | **[Profile](https://github.com/starodubtsevconsulting/ai-profile)** | External personal/organization configuration that activates workflows and supplies runtime/project/provider policy. | [AI Profile repository](https://github.com/starodubtsevconsulting/ai-profile) |
 | **[Command](https://github.com/starodubtsevconsulting/ai-commands)** | Reusable bounded executable AI capability that Agents may invoke when authorized. | [AI Commands repository](https://github.com/starodubtsevconsulting/ai-commands) |
 
-`Contextual knowledge` is intentionally used when clarity is useful for readers unfamiliar with LLM terminology. In shorter technical descriptions, `context` means the same working information. `Memory` remains reserved for information intentionally persisted beyond the current Agent context/session.
+`Contextual knowledge` is used when clarity is useful for readers unfamiliar with LLM terminology. In shorter technical descriptions, `context` means the same working information. `Memory` remains reserved for intentionally persisted information.
 
-### Role → Agent
+## Role → Agent
 
 ```mermaid
 flowchart TD
   Role["Role: Worker"] --> Agent["Agent: Coder"]
   Agent --> Runtime["Runtime instance: Coder (1)"]
-  Runtime --> Config["Context + model + permissions + lifecycle state"]
 ```
 
-A **Worker** is a reusable Role. **Coder** is a Software Development Agent fulfilling that Role. `Coder (1)` may be the current runtime identity/instance of that Agent.
+A **Worker** is a reusable Role. **Coder** is a Software Development Agent fulfilling that Role.
 
 ## Standard roles
 
@@ -58,30 +58,11 @@ A **Worker** is a reusable Role. **Coder** is a Software Development Agent fulfi
 | **Manager** | Coordination, staffing and lifecycle management. | Managed; may self-replace. |
 | **Worker** | Performs bounded domain work. | Disposable/replaceable by design. |
 
-Software Development examples:
-
-`Worker -> Coder`
-
-`Worker -> Designer Reviewer`
-
-`Worker -> Command Runner`
-
-`Worker -> UI Acceptance Tester`
+Software Development examples: `Worker -> Coder`, `Worker -> Designer Reviewer`, `Worker -> Command Runner`.
 
 ## Team templates
 
 A **Team Template** packages reusable team organization and authority rules around Roles. The current [`standard` template](_common/team-templates/standard/README.md) contains common capability, communication, lifecycle and command-policy matrices.
-
-```mermaid
-flowchart TD
-  Standard["Team Template: standard"] --> Roles["Admin / Judge / Strategist / Manager / Worker"]
-  Roles --> SD["Software Development"]
-  Roles --> Other["Another Workflow"]
-  SD --> SDMap["Coder = Worker\nDesigner Reviewer = Worker\nManager = Manager"]
-  Other --> OtherMap["Domain Agent = Worker\nManager = Manager"]
-```
-
-A concrete workflow selects a template, assigns Roles to concrete Agents, and declares only genuine exceptions/overrides.
 
 ## Workflow, Flow and Team
 
@@ -96,15 +77,51 @@ flowchart TD
   W --> Rel["Release Flow"]
 ```
 
-The workflow owns the team. Individual flows coordinate whichever subset of that team is needed. An Agent may participate in multiple flows.
+## Agent capacity: Elastic Agent Pool
+
+**Elastic Agent Pool** is the reusable mechanism for horizontally scaling disposable/cheap Agents when concurrency is useful.
+
+It is different from cloning:
+
+`Cloning = replace an existing Agent while preserving responsibility/context lineage`
+
+`Elastic Agent Pool = add concurrent capacity while existing Agents continue working`
+
+The first concrete use is Command Runner. Software Development normally keeps one ready Runner:
+
+`Command Runner`
+
+When it accepts work, its assignment becomes visible:
+
+`Command Runner (deploy)`
+
+The pool then creates another ready Runner so the next caller does not wait for Agent startup:
+
+```mermaid
+flowchart TD
+  A["Command Runner ready"] --> B["deploy request"]
+  B --> C["Command Runner (deploy)"]
+  C --> D["Create another Command Runner"]
+  D --> E["One Runner remains ready"]
+  E --> F["More work can be accepted concurrently"]
+  C --> G["deploy completes"]
+  G --> H["Return/reuse or archive excess Runner"]
+  H --> I["Settled state: one ready Command Runner"]
+```
+
+For the current Command Runner policy:
+
+`minimum ready capacity = 1`
+
+Idle/ready Runner has no assignment suffix. Parentheses show active assignment, such as `(deploy)` or `(logs)`. When a reused Runner becomes idle again, the assignment suffix is removed.
+
+Pool size, minimum ready capacity, reuse/destruction policy and maximum concurrency may later be workflow/profile/runtime configuration. The mechanism itself is generic and can be applied to another Agent when appropriate.
 
 ## Lifecycle, context transfer and cloning
 
-Agents are replaceable runtime instances. Roles and responsibilities survive individual runtime instances.
+Cloning is a continuity mechanism, not horizontal scaling. The preferred lifecycle is proactive cloning before context exhaustion so contextual knowledge can be transferred reliably.
 
-The preferred lifecycle is **proactive cloning**. The goal is to replace the Agent before exhaustion so its **contextual knowledge** can be transferred reliably.
-
-With the standard two-signal clone policy, proactive replacement starts when both configured conditions are true:
+With the standard two-signal policy:
 
 `compaction/equivalent count >= configured threshold`
 
@@ -112,24 +129,9 @@ With the standard two-signal clone policy, proactive replacement starts when bot
 
 `context utilization/pressure >= configured threshold`
 
-```mermaid
-flowchart TD
-  A["Clone conditions reached"] --> B["Stop outgoing Agent"]
-  B --> C["Context transfer"]
-  C --> D["Outgoing Agent: (cloning) LOCKED"]
-  D --> E["Create replacement"]
-  E --> F["Pass contextual knowledge to replacement"]
-  F --> G["Replacement acknowledges context"]
-  G --> H["Validate + update roster/team"]
-  H --> I["Replacement ACTIVE"]
-  I --> J["Outgoing Agent ARCHIVED"]
-```
+Then the outgoing generation transfers context, enters `(cloning)`, and is replaced by exactly the next generation. Recovery cloning is used when direct context was already lost.
 
-Context transfer normally includes the current objective, decisions, completed work, current state, evidence, blockers, assumptions and next action. It is task-relevant rather than a raw transcript dump.
-
-If proactive cloning is missed and the old Agent has exhausted/lost useful context, the system enters **recovery cloning**. Direct context transfer can no longer be trusted, so contextual knowledge is reconstructed from authorized evidence such as a supervisor/coordinating Agent, work tracker, session storage, durable memory or work artifacts.
-
-The normative lifecycle and recovery behavior live in [`role.spec.md`](role.spec.md) and [`workflow.spec.md`](workflow.spec.md).
+Normative lifecycle rules live in [`role.spec.md`](role.spec.md) and [`workflow.spec.md`](workflow.spec.md).
 
 ## Repository structure
 
@@ -149,12 +151,11 @@ ai-workflows/
     workflow.md
     agents.md
     team/
-      ... workflow bindings and overrides ...
 ```
 
 ## Governance
 
-Judge provides workflow-scoped governance. Its scheduled monitoring is intentionally bounded sampling rather than continuous full-history review. Human may explicitly request deeper historical audits.
+Judge provides workflow-scoped governance. Scheduled monitoring is intentionally bounded sampling rather than continuous full-history review.
 
 ## Concrete workflows
 
@@ -164,7 +165,7 @@ Judge provides workflow-scoped governance. Its scheduled monitoring is intention
 
 ## Common agent/runtime contract
 
-[`role.spec.md`](role.spec.md) defines the common Role-to-Agent instantiation, context-transfer and lifecycle contract. [`workflow.spec.md`](workflow.spec.md) defines workflow recovery sources and concrete bindings.
+[`role.spec.md`](role.spec.md) defines Role-to-Agent instantiation, context-transfer and lifecycle. [`workflow.spec.md`](workflow.spec.md) defines workflow recovery sources and concrete bindings.
 
 ## Relationship to AI Commands
 
