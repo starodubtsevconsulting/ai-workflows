@@ -10,6 +10,8 @@ Bounded dynamic execution/routing Worker for registered AI Commands delegated by
 - interaction-mode: reactive
 - memory-class: `SESSION`
 - lifecycle: ephemeral
+- intelligence: low by default
+- reasoning: low by default
 
 ## Purpose
 
@@ -17,27 +19,76 @@ Command Runner translates bounded caller intent into authorized command invocati
 
 `caller intent -> Command Runner -> resolve command -> authorize -> execute -> bounded report`
 
-Normally uses a low-cost/low-intelligence model.
+Because the work is normally mechanical, Command Runner SHOULD use a cheap/low-intelligence model (for example a configured Luna-class local model) unless a concrete command requires otherwise.
 
-## Default instance and on-demand copies
+## Ready-first Runner pool
 
-A workflow normally keeps **one Command Runner instance available** for routine bounded operations.
+A workflow normally keeps **one ready Command Runner** so the first caller does not pay Agent startup latency.
 
-A slow/long-running command SHOULD NOT unnecessarily monopolize that normal Runner when another temporary Runner can be created cheaply enough. Workflow lifecycle/staffing authority MAY create an additional Command Runner copy on demand for such work.
+When idle, its visible name is simply:
+
+`Command Runner`
+
+No parentheses are shown while it is available.
+
+When it accepts a command, it is temporarily renamed to expose its current assignment:
+
+`Command Runner (deploy)`
+
+`Command Runner (logs)`
+
+`Command Runner (source-control)`
+
+The assignment label is operational/observable state, not a new Role, Agent type, or replacement generation.
+
+### Keep one ready
+
+The intended invariant is:
+
+`ready Command Runner count >= 1`
+
+When the ready Runner accepts work and becomes busy, lifecycle/staffing authority MAY immediately create another plain `Command Runner` so another caller can be served without waiting for the busy Runner to finish.
 
 Example:
 
-`normal Command Runner remains available`
+```text
+Command Runner                     # ready
 
-`deployment requested -> create temporary Command Runner copy -> execute/wait for deploy -> report -> archive temporary copy`
+request: deploy
 
-Typical reasons for an on-demand copy include deployment/pipeline waits, long diagnostics, long imports/exports, or another bounded command expected to occupy a Runner materially longer than routine work.
+Command Runner (deploy)            # busy
+Command Runner                     # new ready Runner
 
-This is **temporary execution capacity**, not cloning/replacement of the normal Runner. Replacement cloning preserves a lineage because an existing instance is being replaced; an on-demand copy adds another concurrent Worker and is archived when its bounded assignment ends.
+request: logs
 
-The concrete runtime may expose a purpose/assignment label for observability, for example `deploy`, but that label MUST NOT be confused with the generation number used by replacement cloning.
+Command Runner (deploy)            # busy
+Command Runner (logs)              # busy
+Command Runner                     # new ready Runner
+```
 
-The workflow/runtime decides whether the startup cost is justified. The common role does not require a warm pool of idle Runners.
+This behaves like a small elastic pool with a **minimum idle/ready capacity of one**. It does not require a fixed maximum pool size at the common Role level; workflow/runtime policy may impose one.
+
+### Completion
+
+A temporary/busy Runner created as part of elastic capacity is normally archived/destroyed after its bounded assignment completes, while one plain ready `Command Runner` remains available.
+
+The runtime MAY reuse a completed Runner as the single ready instance when that is cheaper than destroying it and keeping another one, provided its task context is safely cleared/reset and authorization/runtime state remains valid.
+
+The goal is the invariant, not a particular process identity:
+
+`after work settles -> one ready Command Runner`
+
+### Assignment label vs generation
+
+Parentheses have two different lifecycle uses and MUST remain distinguishable by content:
+
+`Command Runner (deploy)` = current assignment label
+
+`Coder (3)` = replacement generation
+
+If a long-lived Command Runner lineage itself undergoes replacement cloning, generation/state representation must remain unambiguous in runtime metadata. The assignment label is never interpreted as a generation number.
+
+Temporary elastic copies are **horizontal capacity**, not replacement cloning. They do not increment another Runner's clone generation merely because they were spawned.
 
 ## Not a mandatory proxy
 
@@ -47,7 +98,7 @@ Command Runner is not required between every Agent and every AI Command. When an
 
 Prefer a dedicated responsible Agent when one exists and communication is allowed. Otherwise Command Runner may provide bounded dynamic execution.
 
-Frequent use for the same intent is an architectural signal, but it does not automatically require a dedicated Agent; concurrency/latency may be solved by temporary Runner copies instead.
+Frequent use for the same intent is an architectural signal, but it does not automatically require a dedicated Agent; elastic Runner capacity may be the correct solution.
 
 ## Intent-to-command routing
 
@@ -85,4 +136,4 @@ Follows [`../communication.md`](../communication.md), including receiver-side au
 - Does not broaden caller permissions.
 - Does not guess missing high-risk context.
 - Does not maintain durable memory by default.
-- Temporary copies receive only the contextual knowledge and command/provider bindings needed for their bounded assignment.
+- Busy/temporary Runners receive only contextual knowledge and bindings needed for their bounded assignment.
