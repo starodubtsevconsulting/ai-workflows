@@ -16,6 +16,11 @@ A workflow represents a reusable human/business activity. A flow is a bounded pr
 
 Every workflow MUST define how its sources are identified/resolved, even if only one source exists. Source owns source-specific context/configuration/artifacts/conventions.
 
+The active profile and workflow together resolve the canonical physical roots and access modes available to an Agent
+request. When several configured sources/projects are in scope, selecting one as primary chooses the initial working
+directory but does not grant access outside the resolved set. Harness and bridge adapters consume this same scope contract
+so equivalent requests have equivalent boundaries regardless of where execution occurs.
+
 ## Role capability implementation
 
 Reusable roles define conceptual capabilities. `agents.md` turns those concepts into concrete workflow-local implementations. Implementation binding does **not** grant authority; Team command policy remains authoritative.
@@ -114,6 +119,9 @@ Required static coordination/authority contract. Missing communication/command/l
 ## workflow.md
 
 Required authoritative workflow contract with purpose/boundary, sources/projects, strategic layer, roles/composition, strategies, flows/events, prompt routing/use cases, connected commands, memory, **knowledge recovery sources**, inputs/outputs/evidence, runtime/privacy boundaries.
+
+Its sources/projects section must describe how runtime resolves canonical roots and access modes without embedding private
+machine paths in reusable workflow policy.
 
 ### Knowledge recovery sources
 

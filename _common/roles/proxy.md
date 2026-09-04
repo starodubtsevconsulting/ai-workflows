@@ -72,6 +72,7 @@ Concrete Agent instantiation resolves:
 - target/provider/runtime configuration;
 - timeout/cancellation/status capabilities when available;
 - context projection policy;
+- workflow physical-scope projection and enforcement;
 - Elastic Agent Pool policy if enabled.
 
 Example:
@@ -81,6 +82,13 @@ Example:
 ## Context and memory
 
 Proxy forwards only contextual knowledge required for the delegated work. Persistent memory remains separately configured for the represented/target Agent or workflow; proxying does not itself imply durable memory.
+
+Proxy receives the same resolved physical access scope as other Agents in its workflow. It validates explicit paths before
+delegation and passes the bounded scope to the target session as initialization context. The bridge/target must also enforce
+that boundary; prompt text alone is not a security control.
+
+When a request falls outside scope, Proxy returns the sanitized scope reason from the boundary check. It does not invoke the
+target and does not collapse that policy result into a generic bridge or handshake failure.
 
 ## Elastic capacity
 

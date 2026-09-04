@@ -18,11 +18,30 @@ Every runtime AI Agent MUST resolve, at minimum:
 - model/intelligence/reasoning/context configuration;
 - memory/lifecycle/scheduling configuration;
 - capability bindings and Team authorization;
+- physical access scope resolved from the active profile, workflow and selected source/project;
 - clone policy: `clone-after-compactions`, `clone-at-context-utilization`;
 - Elastic Agent Pool policy: `elastic-pool-enabled`;
 - **Harness Context Policy**.
 
 An Agent with unresolved required instantiation parameters is **NOT READY**.
+
+## Workflow physical scope
+
+Every Agent session operates within an explicit physical access scope resolved from the active profile, workflow and
+configured sources/projects. The scope contains canonical workspace roots and the allowed access mode for each root. The
+selected primary source/project chooses the initial working directory; it does not silently replace or broaden the
+workflow's configured scope.
+
+The same resolved scope applies whether work executes directly in the visible Agent harness or through a bridge, proxy,
+external model or locally hosted runtime. Runtime initializes every such execution session with the scope before accepting
+work and enforces it independently of prompt compliance.
+
+An explicit path outside the resolved roots is rejected before filesystem work or delegation. Rejection reports the
+boundary reason and enough sanitized scope information for the caller to correct the request. It MUST NOT be reported as
+a connection, handshake or target-model failure when the bridge itself is healthy.
+
+Scope is deny-by-default. A nearby directory, shared parent, remembered prior session, reachable filesystem location or
+target runtime capability does not authorize access.
 
 ## Harness Context Policy
 
@@ -140,6 +159,7 @@ Reusable Role properties are defaults. Workflow/profile specialization may overr
 - [ ] Agent resolves `elastic-pool-enabled`.
 - [ ] Agent resolves Harness Context Policy before READY.
 - [ ] Harness-specific implementation remains outside reusable workflow/Role definitions.
+- [ ] Physical roots and access modes are resolved and enforced consistently across direct and proxied execution.
 - [ ] Unsupported/unknown harness policy dimensions are reported rather than guessed.
 - [ ] Elastic scaling is not confused with replacement cloning.
 - [ ] Context transfer/recovery lifecycle supported.
