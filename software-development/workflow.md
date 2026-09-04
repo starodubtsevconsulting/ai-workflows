@@ -30,6 +30,8 @@ The Strategist provides durable workflow continuity. Workers are bounded/session
 | “Show me the diff.” / “What changed in Git?” | agent | Command Runner | Routes through `source-control`. |
 | “Commit these changes.” / “Push these changes.” / “Create a branch.” | agent | Command Runner | Bounded `source-control` operation subject to authorization. |
 | “Check the new ticket.” / “Create a ticket for this.” | agent | Manager | Manager owns ticket/work tracking. |
+| “Use this ticket link and start the work.” | agent chain | Designer Reviewer -> Manager | Resolve the link through the configured tracker, return authoritative scope, then continue the implementation flow. |
+| “Is there still work for this topic?” | agent | Manager | Search relevant matching work, including active items; one completed match is not evidence that no active related item exists. |
 | “Review whether this follows the design.” | agent | Designer Reviewer | Design-conformance review. |
 | “Why is this failing?” / “Debug this.” | flow | [`debugging`](flows/debugging.md) | Enter debugging/investigation flow. |
 | “Deploy this branch to dev.” | command execution | temporary Command Runner | Resolve branch + `dev`; create temporary Runner when deployment wait would monopolize normal Runner. |

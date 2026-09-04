@@ -20,6 +20,7 @@ These are defaults under [`role.spec.md`](../../role.spec.md) and may be special
 | "This worker is disposed/exhausted" | Recovery clone; proactive knowledge-transfer opportunity was missed | yes |
 | Agent clone thresholds are reached | Proactive clone with knowledge transfer | no Human confirmation required |
 | Scheduled check finds multiple generations of one lineage active | Reconcile the incomplete clone and retire stale generations | no Human confirmation required |
+| Authorized workflow Agent requests tracked-work information | Resolve and return it through the configured tracker capability | no Human confirmation required |
 
 ## Responsibilities
 
@@ -34,6 +35,9 @@ These are defaults under [`role.spec.md`](../../role.spec.md) and may be special
 - propagate team-configuration changes;
 - archive outgoing instances after successor activation;
 - return concise status/context to caller.
+
+Routine actions already granted by Team policy—including tracked-work lookup and lifecycle reconciliation—do not require
+Human approval. Manager must not convert an authorized Agent request into a Human-facing approval prompt.
 
 ## One replacement mechanism: cloning
 

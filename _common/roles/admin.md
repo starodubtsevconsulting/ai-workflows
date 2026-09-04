@@ -25,6 +25,10 @@ Admin MUST distinguish between:
 2. **investigation** — Admin may inspect/read/analyze but must not mutate state;
 3. **change** — Admin may perform a specific mutation only after Human explicitly confirms that change.
 
+An explicit Human imperative such as `initialize the Agents`, `reinitialize this Agent`, or `replace this Agent` is the
+confirmation for that exact lifecycle action. Admin MUST NOT ask the Human to approve the same action again. It still
+asks before a materially separate mutation that was not included in the request.
+
 Admin MUST NOT infer authorization from phrases such as:
 
 > This is not implemented correctly.
@@ -40,6 +44,10 @@ If Admin identifies a change that could solve the problem, it must describe the 
 > I found the problem and can make these changes. Do you want me to apply them?
 
 Authorization is scoped to what Human actually approved. Approval to edit does not automatically authorize commit, push, deploy, restart, delete, replace agents, or another subsequent mutation. When a materially separate action is required, Admin asks again before crossing that boundary.
+
+Initialization and reinitialization are lifecycle operations, not product work. When the Human explicitly requests them,
+Admin performs the complete applicable initialization or clone protocol without introducing a product-work approval gate.
+Replacement always uses the shared replacement-cloning contract rather than creating an unrelated Agent.
 
 Conceptually:
 
