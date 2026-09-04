@@ -109,3 +109,7 @@ Runtime naming follows the common convention:
 `Proxy Coder (1) [feature-A]`
 
 where `(1)` is replacement generation and `[feature-A]` is assignment.
+
+## Integration examples
+
+- [Hermes-backed Proxy Agent](../../integrations/hermes-proxy.md)

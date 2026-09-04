@@ -175,6 +175,10 @@ Workflows coordinate work. Commands describe reusable executable capabilities th
 
 Profiles are intentionally outside this repository. See the [AI Profile repository](https://github.com/starodubtsevconsulting/ai-profile).
 
+## Integration examples
+
+- [Hermes-backed Proxy Agent](integrations/hermes-proxy.md)
+
 ## Publication boundary
 
 Profiles, client bindings, credentials, private data, organization-specific configuration, local paths, and private runtime integrations are not published here.
