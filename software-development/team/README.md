@@ -5,6 +5,7 @@
 | Included rule | Required application |
 | --- | --- |
 | [Common Agent contract](../../agents.md) | Apply common identity, communication, packet, lifecycle, and safety rules. |
+| [Common Agent Initialization Contract](../../_common/initialization.md) | Apply authoritative roster inventory, archive barriers, durable creation receipts, exact source binding, and all-or-nothing readiness. |
 | [Software Development workflow](../workflow.md) | Apply the workflow's delivery order and ownership boundaries. |
 | [Role capability matrix template](../../role-capability-matrix.md) | Apply common capability and Role-relationship communication semantics before the concrete Team matrices. |
 | [Included Rules Principle](https://github.com/starodubtsevconsulting/ai-commands/blob/main/doc/principles/included-rules-principle.md) | Apply explicit, transitive, fail-closed loading for every rule in this table. |

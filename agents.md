@@ -358,7 +358,8 @@ flowchart TD
   Blocked --> Outcome
 ```
 
-The workflow-owned initialization entrypoint verifies or bootstraps Admin and performs all task mutation. Initialization
+The workflow-owned initialization entrypoint applies the [Common Agent Initialization Contract](_common/initialization.md),
+verifies or bootstraps Admin, and performs all task mutation. Initialization
 creates the complete declared governed roster. When a human requests full reinitialization including Admin, the active
 Admin creates one successor Admin in the same runtime project, verifies its exact returned task ID, contract, source,
 model, reasoning, and `ADMIN_READY` acknowledgement, and archives the predecessor only after the successor is ready.
@@ -368,6 +369,10 @@ archives the complete old governed roster, verifies an inactive barrier, creates
 task IDs, and verifies every readiness token. Archive/remove/delete are recoverable archive operations unless the
 workflow explicitly defines a safer alternative. Partial generations, implicit profile selection, title-only identity,
 hidden substitutes, and cross-project reuse are `BLOCKED`.
+
+The common initialization contract is authoritative for uncapped project inventory, the inactive-roster barrier,
+pending-receipt idempotency, duplicate reconciliation, immutable source revision, task-ID directory binding, and
+all-or-nothing readiness. A workflow may narrow those safeguards but must not weaken or replace them.
 
 ## Workflow extension boundary
 

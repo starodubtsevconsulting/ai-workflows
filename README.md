@@ -165,7 +165,7 @@ Judge provides workflow-scoped governance. Scheduled monitoring is intentionally
 
 ## Common agent/runtime contract
 
-[`role.spec.md`](role.spec.md) defines Role-to-Agent instantiation, context-transfer and lifecycle. [`workflow.spec.md`](workflow.spec.md) defines workflow recovery sources and concrete bindings.
+[`role.spec.md`](role.spec.md) defines Role-to-Agent instantiation, context-transfer and lifecycle. [`workflow.spec.md`](workflow.spec.md) defines workflow recovery sources and concrete bindings. The [Common Agent Initialization Contract](_common/initialization.md) defines authoritative roster inventory, duplicate-safe replacement batches, immutable source binding, and readiness cutover.
 
 ## Relationship to AI Commands
 
