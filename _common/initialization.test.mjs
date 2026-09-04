@@ -10,6 +10,9 @@ const agents = fs.readFileSync(path.join(root, 'agents.md'), 'utf8');
 const team = fs.readFileSync(path.join(root, 'software-development/team/README.md'), 'utf8');
 
 test('public initialization contract preserves duplicate-safe lifecycle gates', () => {
+  assert.match(contract, /^## What this contract is$/m);
+  assert.match(contract, /reusable safety contract for creating, replacing, and reinitializing/);
+  assert.match(contract, /infrastructure policy, not a Team definition or product-work workflow/);
   assert.match(contract, /authoritative, uncapped/);
   assert.match(contract, /BLOCKED_AUTHORITATIVE_ROSTER_INVENTORY_UNAVAILABLE/);
   assert.match(contract, /`clientThreadId` is pending, not absent or failed/);

@@ -7,6 +7,23 @@
 | [Included Rules Principle](https://github.com/starodubtsevconsulting/ai-commands/blob/main/doc/principles/included-rules-principle.md) | Load external rule dependencies explicitly and transitively. |
 | [Diagram First Principle](https://github.com/starodubtsevconsulting/ai-commands/blob/main/doc/principles/diagram-first-principle.md) | Keep lifecycle decisions and blocked routes aligned with the diagrams below. |
 
+## What this contract is
+
+This file defines the reusable safety contract for creating, replacing, and reinitializing a workflow's runtime Agent
+roster. It exists to prevent a lifecycle administrator from creating duplicate Agents, replacing only part of a Team,
+initializing Agents from different rule versions, or declaring a roster ready before every Agent has a verified identity.
+
+A workflow initializer or human-controlled Admin applies this contract when it performs an Agent lifecycle operation. The
+workflow still defines which Agents exist, their models, role contracts, communication routes, and readiness tokens; this
+file defines how those declarations become one consistent set of live runtime tasks. In practical terms, it governs the
+transition from an old roster to a new roster: inventory existing tasks, archive the selected generation, wait for proof
+that it is inactive, create one replacement batch, bind exact task IDs, and verify the whole Team before use.
+
+This contract is infrastructure policy, not a Team definition or product-work workflow. It does not grant Agents new
+capabilities, decide who may delegate to whom, choose a runtime provider, or authorize ordinary work. A workflow may add
+stricter lifecycle requirements, but it must not weaken the duplicate-prevention, source-consistency, or readiness gates
+defined here.
+
 ## Authoritative inventory and archive barrier
 
 ```mermaid
@@ -73,4 +90,3 @@ flowchart TD
   `BLOCKED_INITIALIZATION_SOURCE_REVISION`. Archive the candidate by exact ID; never bind it.
 - Bind the complete exact task-ID directory after all rows resolve. Readiness is all-or-nothing and requires every exact
   role acknowledgement before the new generation becomes dispatchable.
-
