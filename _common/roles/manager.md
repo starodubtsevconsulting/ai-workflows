@@ -19,6 +19,7 @@ These are defaults under [`role.spec.md`](../../role.spec.md) and may be special
 | "Replace this Agent" | Clone current Agent into its next generation | yes |
 | "This worker is disposed/exhausted" | Recovery clone; proactive knowledge-transfer opportunity was missed | yes |
 | Agent clone thresholds are reached | Proactive clone with knowledge transfer | no Human confirmation required |
+| Scheduled check finds multiple generations of one lineage active | Reconcile the incomplete clone and retire stale generations | no Human confirmation required |
 
 ## Responsibilities
 
@@ -107,6 +108,25 @@ while incoming successor is:
 An outgoing `(cloning)` Agent is unavailable for ordinary work/communication and may perform only minimal authorized lifecycle protocol activity until archived.
 
 The normal proactive lock begins only after knowledge transfer has been obtained. In recovery cloning, where reliable knowledge is already lost, Manager may lock the exhausted instance immediately.
+
+## Clone transaction and reconciliation
+
+Cloning is a self-checking lifecycle transaction, not a best-effort sequence of unrelated actions. Completion requires
+authoritative evidence that exactly one intended successor is active and every superseded generation is archived and
+untrusted.
+
+Before cloning a scheduled Agent, Manager/runtime pauses the outgoing schedule. The successor receives the equivalent
+schedule only after validation and roster activation. The outgoing schedule is then removed with the outgoing identity.
+If successor creation or validation fails, Manager/runtime restores the last verified roster and schedule state when that
+state remains healthy; otherwise it reports a recovery blocker without running two scheduled generations concurrently.
+
+Manager's periodic lifecycle check reconciles incomplete or delayed clone transactions across the entire managed roster.
+It MUST reason from role, lineage, generation, lifecycle state and authoritative runtime identity—not from hard-coded Agent
+names. A state such as two active generations, an outgoing `(cloning)` instance remaining after successor activation, or a
+schedule attached to a stale generation is drift that Manager repairs under already-granted lifecycle authority.
+
+Reconciliation succeeds only after a fresh roster/archive/schedule observation proves the invariant. A create response,
+display title, requested archive, or absence from one partial UI listing is not sufficient proof.
 
 ## Team configuration change
 

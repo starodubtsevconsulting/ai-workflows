@@ -93,6 +93,12 @@ Cloning is distinct from Elastic Agent Pool:
 
 When both configured context-health signals are available, proactive cloning requires compaction/equivalent threshold **AND** context-utilization/pressure threshold. Context transfer occurs before outgoing lock when reliable context remains; recovery cloning reconstructs contextual knowledge when proactive transfer was missed.
 
+Replacement is transactional and self-checking. Runtime must verify the successor, update the authoritative roster, migrate
+any schedule, archive the superseded identity and then re-read authoritative state to prove that exactly one intended
+generation remains active. Delayed completion is reconciled rather than treated as a second request to create another
+successor. Scheduled execution is suspended for an outgoing `(cloning)` identity and resumes only for the validated active
+generation. These invariants apply to every Agent lineage; examples never restrict them to a particular Agent name.
+
 ## Runtime naming
 
 Common display convention:
@@ -137,5 +143,6 @@ Reusable Role properties are defaults. Workflow/profile specialization may overr
 - [ ] Unsupported/unknown harness policy dimensions are reported rather than guessed.
 - [ ] Elastic scaling is not confused with replacement cloning.
 - [ ] Context transfer/recovery lifecycle supported.
+- [ ] Clone completion proves one active generation and no stale scheduled predecessor.
 - [ ] Initialization validated before activation.
 - [ ] Team authorization remains authoritative.
