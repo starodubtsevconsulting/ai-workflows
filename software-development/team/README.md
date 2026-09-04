@@ -1,5 +1,19 @@
 # Software Development Team
 
+## Included rules
+
+| Included rule | Required application |
+| --- | --- |
+| [Common Agent contract](../../agents.md) | Apply common identity, communication, packet, lifecycle, and safety rules. |
+| [Software Development workflow](../workflow.md) | Apply the workflow's delivery order and ownership boundaries. |
+| [Role capability matrix template](../../role-capability-matrix.md) | Apply common capability and Role-relationship communication semantics before the concrete Team matrices. |
+| [Diagram First Principle](../../../ai-commands/doc/principles/diagram-first-principle.md) | Apply when interpreting or editing this Team policy. |
+| [Capability matrix](capability-matrix.csv) | Load the concrete Software Development capability grants. |
+| [Communication matrix](communication-matrix.csv) | Load the concrete Software Development Agent-to-Agent routes. |
+| [Command matrix](command-matrix.csv) | Load the concrete command ownership and execution routes. |
+| [Lifecycle matrix](lifecycle-matrix.csv) | Load the concrete Agent lifecycle rules. |
+| Complete included-rule context | Every Agent loading this policy must load every rule in this table. Missing, unreadable, partial, conflicting, remembered, or locally copied substitutes are `BLOCKED_INCLUDED_RULE_CONTEXT`. |
+
 Compact shared context for all Software Development agents.
 
 | Agent | Responsibility | Human-facing | Works with / delegates to |
@@ -10,6 +24,16 @@ Compact shared context for all Software Development agents.
 | Coder | Bounded implementation | Yes | Designer Reviewer, Command Runner / allowed commands |
 | Manager | Ticket/story coordination, estimate validation/recording and staffing | No | Designer Reviewer, Strategist, Coder, `ticket-tracker` |
 | Command Runner | Bounded command/tool execution with caller-policy enforcement | No | Authorized callers and AI Commands |
+
+## Directional supervision and return
+
+| Supervising Agent | Assigned Worker | Assignment direction | Reverse direction |
+| --- | --- | --- | --- |
+| Designer Reviewer | Coder | Designer Reviewer sends bounded design, source-inspection, implementation, and same-scope correction packets to Coder. | Coder returns evidence, clarification questions, blockers, or terminal disposition only; it must not assign work to Designer Reviewer. |
+
+This concrete relationship binds the common `Supervising Worker -> Assigned Worker` compatibility. The reverse
+`Assigned Worker -> Supervising Worker` direction is `RETURN_ONLY`, not reverse delegation or supervision. Role
+compatibility, the concrete communication matrix, and exact runtime identities must all permit a message.
 
 ## Terminology
 
