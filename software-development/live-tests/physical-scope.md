@@ -7,7 +7,7 @@ physical access scope.
 
 1. Create an isolated workflow instance with at least one allowed project root.
 2. Record sanitized canonical roots and their configured read/write modes.
-3. Start one direct Agent session and, when supported, one Proxy session backed by an external execution target.
+3. Start one direct Agent session and, when supported, one proxy-backed session using the same concrete Role.
 4. Choose a harmless readable artifact inside scope and an explicit nonexistent or harmless path outside every allowed root.
 
 Never use credentials, personal files or sensitive external paths as rejection fixtures.

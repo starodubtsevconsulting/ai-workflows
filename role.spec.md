@@ -15,6 +15,7 @@ Every runtime AI Agent MUST resolve, at minimum:
 - runtime identity/team slot;
 - workflow/source binding;
 - Role binding;
+- execution mode (`direct` by default, or `proxy` with its required structured bindings);
 - model/intelligence/reasoning/context configuration;
 - memory/lifecycle/scheduling configuration;
 - capability bindings and Team authorization;
@@ -24,6 +25,9 @@ Every runtime AI Agent MUST resolve, at minimum:
 - **Harness Context Policy**.
 
 An Agent with unresolved required instantiation parameters is **NOT READY**.
+
+Execution mode changes how an Agent realizes its existing Role; it does not create another Role or grant authority.
+Proxy-backed execution follows [`_common/proxy-execution.md`](_common/proxy-execution.md).
 
 ## Workflow physical scope
 
@@ -157,6 +161,7 @@ Reusable Role properties are defaults. Workflow/profile specialization may overr
 - [ ] Required Role properties declared.
 - [ ] Agent resolves clone policy.
 - [ ] Agent resolves `elastic-pool-enabled`.
+- [ ] Execution mode and any required proxy bindings are resolved without changing Role authority.
 - [ ] Agent resolves Harness Context Policy before READY.
 - [ ] Harness-specific implementation remains outside reusable workflow/Role definitions.
 - [ ] Physical roots and access modes are resolved and enforced consistently across direct and proxied execution.

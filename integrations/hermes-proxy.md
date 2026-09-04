@@ -1,13 +1,13 @@
 # Hermes-backed Proxy Agent example
 
-This optional integration example shows how a runtime can realize the reusable [`Proxy`](../_common/roles/proxy.md) Role
-with Hermes as the external Agent harness. It is not part of the generic Proxy contract and does not require workflows to
-use Hermes, MCP, a particular model provider or a particular transport API.
+This optional integration example shows how a runtime can realize
+[`proxy` execution](../_common/proxy-execution.md) with Hermes as the external Agent harness. Proxying does not introduce
+a Role, and this example does not require workflows to use Hermes, MCP, a particular model provider or transport API.
 
 ## Separation of responsibilities
 
 ```text
-Workflow Agent -> Proxy Role -> registered bridge -> Hermes session -> configured model/provider
+Workflow Agent + existing Role + proxy execution -> registered bridge -> Hermes session -> configured model/provider
 ```
 
 - The workflow defines the visible Agent, represented responsibility and Team authorization.
@@ -17,8 +17,8 @@ Workflow Agent -> Proxy Role -> registered bridge -> Hermes session -> configure
 - Hermes resolves its model/provider configuration without exposing credentials to the Proxy Agent.
 
 `Proxy Coder` is an appropriate visible Agent name when the represented responsibility is software implementation.
-`Proxy` remains the reusable Role name. `Local Coder` is less precise because location does not describe the proxy
-boundary and the backing target need not remain local.
+Its existing `Worker` Role remains authoritative. `Local Coder` is less precise because location does not describe the
+proxy boundary and the backing target need not remain local.
 
 ## Profile-driven configuration
 
@@ -30,8 +30,10 @@ Conceptual configuration:
 ```yaml
 agent:
   name: Proxy Coder
-  role: Proxy
+  role: Worker
   represents: implementation
+  execution:
+    mode: proxy
 bridge:
   adapter: <registered-bridge-adapter>
   submit-operation: <registered-submit-operation>
@@ -57,15 +59,15 @@ Runtime should:
 3. initialize or attach to a Hermes session with that scope;
 4. perform a bounded, non-product identity/readiness handshake;
 5. retain only sanitized executor/provider/model identity needed to validate later receipts;
-6. mark the Proxy Agent ready when its own identity and bridge contract are valid.
+6. mark the proxy-backed Agent ready when its own identity, Role and bridge contract are valid.
 
-Temporary Hermes unavailability does not require recreating the visible Proxy Agent when the bridge remains correctly
+Temporary Hermes unavailability does not require recreating the visible proxy-backed Agent when the bridge remains correctly
 installed. Until a successful identity receipt exists, every accepted request retries the handshake before delegation.
 A runtime or bridge restart similarly triggers reconnection and revalidation without widening the session scope.
 
 ## Delegation lifecycle
 
-For each accepted request, Proxy Agent:
+For each accepted request, the proxy-backed Agent:
 
 1. validates caller, Team route, represented capability and explicit filesystem paths;
 2. submits the bounded request exactly once with a new correlation ID;
@@ -74,12 +76,12 @@ For each accepted request, Proxy Agent:
 5. presents the correlated terminal Hermes result with minimal transformation;
 6. preserves sanitized provenance and failure classification.
 
-Proxy Agent must never answer the delegated request using its wrapper model, silently choose another target, start an
+The proxy-backed Agent must never answer the delegated request using its wrapper model, silently choose another target, start an
 unconfigured service, or infer an endpoint by scanning the machine.
 
 ## Physical scope
 
-Direct launcher-created Hermes sessions and Proxy-created Hermes delegations receive the same canonical roots and access
+Direct launcher-created Hermes sessions and proxy-created Hermes delegations receive the same canonical roots and access
 modes resolved from the active profile/workflow. The primary project selects the starting directory; all configured roots
 remain bounded by their declared modes.
 
@@ -106,9 +108,9 @@ details or unrestricted filesystem inventory.
 
 ## Acceptance checks
 
-- A request succeeds when Hermes starts before the Proxy Agent.
-- A request retries successfully when Hermes starts after the Proxy Agent.
-- A bridge/runtime restart reconnects without Proxy Agent reinitialization.
+- A request succeeds when Hermes starts before the proxy-backed Agent.
+- A request retries successfully when Hermes starts after the proxy-backed Agent.
+- A bridge/runtime restart reconnects without proxy-backed Agent reinitialization.
 - A correlated long-running request returns its eventual terminal response rather than an invented wrapper response.
 - An inside-scope project request succeeds.
 - An outside-scope path is rejected descriptively before delegation.
