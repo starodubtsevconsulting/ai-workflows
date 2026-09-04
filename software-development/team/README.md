@@ -7,7 +7,8 @@
 | [Common Agent contract](../../agents.md) | Apply common identity, communication, packet, lifecycle, and safety rules. |
 | [Software Development workflow](../workflow.md) | Apply the workflow's delivery order and ownership boundaries. |
 | [Role capability matrix template](../../role-capability-matrix.md) | Apply common capability and Role-relationship communication semantics before the concrete Team matrices. |
-| [Diagram First Principle](../../../ai-commands/doc/principles/diagram-first-principle.md) | Apply when interpreting or editing this Team policy. |
+| [Included Rules Principle](https://github.com/starodubtsevconsulting/ai-commands/blob/main/doc/principles/included-rules-principle.md) | Apply explicit, transitive, fail-closed loading for every rule in this table. |
+| [Diagram First Principle](https://github.com/starodubtsevconsulting/ai-commands/blob/main/doc/principles/diagram-first-principle.md) | Apply when interpreting or editing this Team policy. |
 | [Capability matrix](capability-matrix.csv) | Load the concrete Software Development capability grants. |
 | [Communication matrix](communication-matrix.csv) | Load the concrete Software Development Agent-to-Agent routes. |
 | [Command matrix](command-matrix.csv) | Load the concrete command ownership and execution routes. |
